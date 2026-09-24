@@ -1,0 +1,48 @@
+{
+  "common": {
+    "appName": "LIGHT",
+    "getStarted": "Get Started",
+    "continue": "Continue",
+    "back": "Back",
+    "skip": "Skip",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Try Again",
+    "join": "Join",
+    "connect": "Connect",
+    "offlineNotice": "You are currently offline. Showing cached content."
+  },
+  "auth": {
+    "welcomeTitle": "Your Perfect Match Is One Swipe Away",
+    "welcomeSubtitle": "Discover genuine connections, meaningful chats, and exciting opportunities ahead",
+    "weCrossedPaths": "WE CROSSED PATHS",
+    "createAccount": "Create Account",
+    "login": "Log In",
+    "phoneLabel": "Phone Number",
+    "emailLabel": "Email Address",
+    "sendOtp": "Send Verification Code",
+    "enterOtp": "Enter 6-digit Code",
+    "resendCode": "Resend code"
+  },
+  "onboarding": {
+    "ageGateTitle": "How old are you?",
+    "ageGateSubtitle": "LIGHT is strictly for adults 18 and older.",
+    "identityTitle": "What's your name?",
+    "intentTitle": "What brings you to LIGHT?",
+    "interestsTitle": "Pick your top interests",
+    "interestsMinCount": "Select at least 5 interests to help us find matching Circles"
+  },
+  "tabs": {
+    "home": "Home",
+    "discover": "Explore",
+    "circles": "Circles",
+    "messages": "Messages",
+    "me": "Me"
+  },
+  "emptyStates": {
+    "noNearby": "There is not enough activity in your area yet.",
+    "noCircles": "No active Circle matches this filter yet.",
+    "noEvents": "Nothing scheduled nearby right now.",
+    "noMessages": "Your conversations start after a mutual connection."
+  }
+}

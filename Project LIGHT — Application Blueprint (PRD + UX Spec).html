@@ -1,0 +1,5256 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Project LIGHT — Application Blueprint (PRD + UX Spec)</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#FAF7F2;--fg:#1F2430;--muted:#5b6170;--line:#e3ddd2;--card:#fff;--code:#f1ece3;--accent:#B4531F;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#16181d;--fg:#ece8e1;--muted:#a3a7b1;--line:#2c3038;--card:#1e2128;--code:#252932;--accent:#e58b58;}}
+:root[data-theme="dark"]{--bg:#16181d;--fg:#ece8e1;--muted:#a3a7b1;--line:#2c3038;--card:#1e2128;--code:#252932;--accent:#e58b58;}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif}
+main{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+h1{font-size:2rem;line-height:1.2;margin:.4em 0}
+h1:not(:first-child){margin-top:2.4em;padding-top:.8em;border-top:2px solid var(--accent);font-size:1.55rem}
+h2{font-size:1.25rem;margin-top:2em} h3{font-size:1.08rem;margin-top:1.6em;color:var(--accent)}
+a{color:var(--accent)} hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.tw{overflow-x:auto;margin:1em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;min-width:90px}
+th{background:var(--code);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);padding:14px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.45}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em} pre code{background:none;padding:0}
+blockquote{margin:1em 0;padding:.4em 1em;border-left:4px solid var(--accent);background:var(--card);color:var(--muted)}
+li{margin:.25em 0}
+</style></head><body><main>
+<h1 id="project-LIGHT-application-blueprint-prd-ux-specification">Project LIGHT — Application Blueprint (PRD + UX Specification)</h1>
+<p><strong>Status:</strong> v0.1 working draft · <strong>Audience:</strong> Founder, PM, UI/UX, Frontend, Backend, QA, AI/Recsys
+<strong>Name:</strong> "LIGHT" is a placeholder; trademark/domain not checked.</p>
+<h2 id="how-to-read-this-document">How to read this document</h2>
+<ul>
+<li><strong>Feature tags</strong> used throughout: <strong>[CORE]</strong> directly drives the core loop · <strong>[SUPPORT]</strong> makes the core loop safe or usable · <strong>[FUTURE]</strong> valuable later · <strong>[BLOAT]</strong> do not build.</li>
+<li><strong>Release tags:</strong> <strong>MVP</strong> (first build, ~first 6 months), <strong>V2</strong>, <strong>V3</strong>.</li>
+<li><strong>Screen IDs</strong> are stable. Use them as ticket prefixes.</li>
+<li><strong>What is assumption vs. evidence.</strong> Product structure here follows the earlier strategy blueprint. Thresholds, costs, timelines and copy are proposals to be tested, not benchmarks. Competitor statistics and legal timelines cited earlier must be verified before external use. Have counsel review age-gating, DPDP consent flows, and grievance-officer requirements before launch.</li>
+<li><strong>Deliberate deviation from the brief.</strong> You asked me not to assume the flow <em>Interests → Communities → Interaction → Connection</em> is correct. The research points to a refinement: the unit that produces relationships is not the large community but the <strong>small recurring Circle</strong> (4–8 people) plus <strong>Activities</strong> (real sessions). So the loop below inserts Circles and Activities between "Community" and "Connection", and Communities become lightweight local interest hubs in MVP rather than a Reddit-style feed.</li>
+</ul>
+<hr />
+<h1 id="part-1-product-foundation">PART 1 — PRODUCT FOUNDATION</h1>
+<h2 id="11-product-purpose">1.1 Product purpose</h2>
+<p><strong>Problem.</strong> Young urban Indians (18–29) who have moved city, graduated, started work or work remotely often lack <em>a few nearby people to repeatedly do things with</em>. Existing tools fail in specific ways:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Existing tool</th>
+<th>Where it fails for this job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dating apps</td>
+<td>Match before context; conversations die; intent ambiguity; harassment before moderation</td>
+</tr>
+<tr>
+<td>Reddit / WhatsApp groups</td>
+<td>Discovery is fragmented; no progression from "replied to my post" to "we meet weekly"</td>
+</tr>
+<tr>
+<td>Discord</td>
+<td>Persistent but not local; no introduction mechanism</td>
+</tr>
+<tr>
+<td>Meetup / event apps</td>
+<td>Event-centric, one-off; large anonymous groups; weak repeat-contact mechanics</td>
+</tr>
+<tr>
+<td>Instagram</td>
+<td>Works only for existing social graphs</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Job to be done:</strong> <em>"Help me find a few people nearby whom I would actually enjoy spending time with, repeatedly, without pressure."</em></p>
+<p><strong>Product promise:</strong> Find people nearby who are into the same things — and actually do something together. Dating is one possible outcome, never the entry requirement.</p>
+<h2 id="12-target-users">1.2 Target users</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>Initial target?</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recent city movers, 22–29 (job relocation)</td>
+<td><strong>Yes — primary</strong></td>
+<td>Highest felt pain, clear trigger event, strong Reddit signal</td>
+</tr>
+<tr>
+<td>Young professionals, WFH/hybrid</td>
+<td><strong>Yes — primary</strong></td>
+<td>Lack of incidental social contact</td>
+</tr>
+<tr>
+<td>Recent graduates (21–24)</td>
+<td><strong>Yes — secondary</strong></td>
+<td>Losing campus network</td>
+</tr>
+<tr>
+<td>Introverted / socially anxious</td>
+<td>Served by design, not targeted by marketing</td>
+<td>Small groups + structured activities help them; do not label them</td>
+</tr>
+<tr>
+<td>Hobby community members / hosts</td>
+<td><strong>Yes — supply side</strong></td>
+<td>Hosts are your distribution layer</td>
+</tr>
+<tr>
+<td>College students (18–21)</td>
+<td><strong>No (defer)</strong></td>
+<td>Campus networks exist; higher safety/age-boundary risk; different acquisition</td>
+</tr>
+<tr>
+<td>Pure dating seekers</td>
+<td><strong>No (accept, don't target)</strong></td>
+<td>Most competitive segment; dating is layered on later</td>
+</tr>
+<tr>
+<td>Event-only users</td>
+<td>Accept as by-product</td>
+<td>Do not build ticketing marketplace</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Beachhead cohort (proposal):</strong> 22–29, one metro (e.g., Bengaluru), 2–3 zones, 5 activity categories (badminton/sports, movies, photography, gaming/board games, food/café). Choose city based on your team's ability to recruit hosts in person.</p>
+<h2 id="13-relationship-modes">1.3 Relationship modes</h2>
+<p><strong>Decision: one experience, not separate modes.</strong> Separate Dating / Friendship / Community modes triple the cold-start problem and reproduce the intent confusion users complain about.</p>
+<p>Instead, every user sets an <strong>Intent</strong> (multi-select, changeable anytime, private by default):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Intent value</th>
+<th>Meaning</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Friends</td>
+<td>Wants friendships</td>
+<td>Default escalation outcome = Friend</td>
+</tr>
+<tr>
+<td>Dating</td>
+<td>Open to romantic connection</td>
+<td>Can be offered "Dating" option in escalation <em>only when both users have it</em></td>
+</tr>
+<tr>
+<td>Just activities</td>
+<td>Wants activity partners/groups only</td>
+<td>No 1:1 escalation prompts; still can be invited by others as activity buddy</td>
+</tr>
+<tr>
+<td>Not sure yet</td>
+<td>Exploring</td>
+<td>Treated as Friends + Just activities; prompted to revisit after 3 activities</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Rules:</strong>
+1. Intent is never shown as a public "dating" badge in Circles. It is only revealed at the moment of mutual escalation.
+2. Dating intent never enables unsolicited romantic contact. The only pathway to a 1:1 is mutual escalation (Part 15).
+3. Circles may be tagged <strong>Friends-only</strong> at creation, in which case dating escalation is disabled inside that Circle (users can still connect as friends).
+4. Women-only, LGBTQ+-friendly and "verified-only" Circles are first-class filters [SUPPORT].</p>
+<h2 id="14-core-product-loop">1.4 Core product loop</h2>
+<pre><code class="language-text">Need (new city / no people)
+   ↓
+Pick a thing to do (Home: &quot;This week&quot;)
+   ↓
+Join a Circle (4–8) or an Activity
+   ↓
+Group interaction (prompt + chat)
+   ↓
+Real-world Activity (or online-first if user prefers)
+   ↓
+Post-activity: &quot;Want to see these people again?&quot;
+   ↓
+Repeat with same people (Circle continues)
+   ↓
+Mutual connection (opt-in, 1:1)
+   ↓
+Friend / Activity partner / Dating (mutual)
+   ↓
+Creates or hosts next Activity  →  loops back
+</code></pre>
+<p><strong>North-star metric:</strong> Meaningful Connection Rate (MCR) = activated users with a repeated positive interaction ÷ activated users. Define "repeated positive interaction" operationally in Part 42.</p>
+<h2 id="15-application-architecture">1.5 Application architecture</h2>
+<p>The proposed hierarchy is reduced from 13 top-level modules to 5 tabs. Dating and Friendship are <strong>not</strong> modules; they are states of a Connection.</p>
+<pre><code class="language-text">APP
+│
+├── Authentication (AUTH)          [SUPPORT, MVP]
+├── Onboarding (ONB)               [CORE, MVP]
+│
+├── TAB 1: Home (HOME)             [CORE, MVP]   &quot;What can I do this week?&quot;
+├── TAB 2: Discover (DISC)         [CORE, MVP]
+│     ├── Circles
+│     ├── Activities
+│     ├── People (curated, limited)  ← V2 for full; MVP = &quot;People in your Circles&quot; only
+│     └── Communities (local interest hubs)
+├── TAB 3: Circles (CIR)           [CORE, MVP]   My Circles + Create
+├── TAB 4: Messages (MSG)          [CORE, MVP]   Groups + Connections
+├── TAB 5: Me (PROF/SET)           [SUPPORT, MVP]
+│     ├── Profile, Verification, Connections, Saved
+│     ├── Safety Center (SAFE)
+│     └── Settings (privacy, notifications, data, subscription)
+│
+├── Global (not tabs)
+│     ├── Search (SRCH)            [SUPPORT, V2 for full; MVP = interest/Circle search only]
+│     ├── Notifications (NOTIF)    [SUPPORT, MVP]  bell icon on Home
+│     ├── Connection requests (CONN) [CORE, MVP]
+│     ├── Date planning (DATE)     [FUTURE-ish, Post-MVP pilot]
+│     ├── Events/Activities (EVT)  [CORE, MVP]    reached from Home/Discover/Circle
+│     └── Subscription (SUB)       [SUPPORT, V2]
+│
+└── Admin console (ADM)            [SUPPORT, MVP-lite]
+</code></pre>
+<p><strong>Removed / merged and why</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Original module</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dating (module)</td>
+<td>Merged into Connections</td>
+<td>Avoids separate marketplace; dating is a mutual outcome</td>
+</tr>
+<tr>
+<td>Friendship (module)</td>
+<td>Merged into Connections</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>Communities as feed</td>
+<td>Downgraded to hubs in MVP</td>
+<td>Avoids "Reddit-lite"; posts/comments arrive V2</td>
+</tr>
+<tr>
+<td>Events</td>
+<td>Renamed <strong>Activities</strong>, surfaced on Home</td>
+<td>Concrete, actionable</td>
+</tr>
+<tr>
+<td>Search (global)</td>
+<td>Reduced in MVP</td>
+<td>Curated discovery outranks search at &lt;1,000 users</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-2-complete-user-journey">PART 2 — COMPLETE USER JOURNEY</h1>
+<pre><code class="language-text">Discovers app (host invite link / Instagram / campus society / referral)
+   ↓
+Deep link → app store → install
+   ↓
+Open → SPLASH (AUTH-01)
+   ↓
+WELCOME (AUTH-02) ── Have account? ──→ LOGIN (AUTH-05)
+   ↓ New
+PHONE (AUTH-03) → OTP (AUTH-04)
+   ↓
+AGE/DOB (ONB-01) ── under 18 ──→ BLOCKED (ONB-01b)
+   ↓ 18+
+INTENT (ONB-02)
+   ↓
+INTERESTS (ONB-03) → TASTE (ONB-04, skippable) → SOCIAL STYLE (ONB-05)
+   ↓
+LOCATION (ONB-06) → AVAILABILITY (ONB-07)
+   ↓
+SAFETY &amp; PRIVACY SETUP (ONB-08)
+   ↓
+PROFILE (ONB-09: name, 1 photo, 1 line)
+   ↓
+VERIFICATION NUDGE (ONB-10, skippable)
+   ↓
+RECOMMENDATION GENERATION (ONB-11: &quot;Finding your first Circles…&quot;)
+   ↓
+HOME (HOME-01) — 3–5 Circles / Activities for this week
+   ↓
+Circle page (CIR-01) → Join → Group prompt → Group chat (MSG-02)
+   ↓
+Activity (EVT-01) → RSVP → safety checklist → check-in (EVT-03) → attend
+   ↓
+Post-activity: &quot;See these people again?&quot; (EVT-04)
+   ↓
+Repeat activity (same Circle)
+   ↓
+Connection request (CONN-01) → mutual → 1:1 chat (MSG-03)
+   ↓
+Friend  ─or─  Dating (mutual) → Date planning (DATE-01) → Post-date feedback
+   ↓
+Retention loops (weekly Circle rhythm, host creation)
+   ↓
+[V2] Paid events / premium discovery (SUB-01)
+   ↓
+Account management (SET-*)
+   ↓
+Logout (SET-07) / Delete account (SET-08 → SET-09)
+</code></pre>
+<p><strong>Decision points that change the path</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Branch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Age &lt; 18</td>
+<td>Hard block; no account, no data retained beyond a hashed block token</td>
+</tr>
+<tr>
+<td>User skips verification</td>
+<td>Allowed; access to <em>some</em> features gated (see Part 8)</td>
+</tr>
+<tr>
+<td>Location denied</td>
+<td>Manual city + zone entry; no "nearby" ranking</td>
+</tr>
+<tr>
+<td>Intent = Just activities</td>
+<td>Never see escalation prompts</td>
+</tr>
+<tr>
+<td>No Circles in user's zone</td>
+<td>Waitlist + "start one" prompt (host flow)</td>
+</tr>
+<tr>
+<td>Report during activity</td>
+<td>Safety flow pre-empts everything (SAFE-02)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-3-first-app-open">PART 3 — FIRST APP OPEN</h1>
+<h3 id="auth-01-splash">AUTH-01 — Splash</h3>
+<ul>
+<li><strong>Purpose:</strong> Brand moment while the app performs a session check. Must not exceed ~1.5s perceived.</li>
+<li><strong>Who sees it:</strong> Everyone on every cold start.</li>
+<li><strong>Entry point:</strong> App launch.</li>
+<li><strong>UI components:</strong> Logo (static; a subtle 400ms fade/scale), no tagline, no spinner unless check exceeds 1.2s (then a small progress dot).</li>
+<li><strong>Behavior:</strong> (1) Read secure-store refresh token. (2) If present, call <code>POST /auth/refresh</code>. (3) Route: valid session + onboarding complete → HOME-01; valid session + onboarding incomplete → resume at last completed step (server-tracked); no/invalid session → AUTH-02. (4) Also fetch remote config (min supported version, feature flags, maintenance banner).</li>
+<li><strong>Primary CTA / secondary:</strong> None.</li>
+<li><strong>User inputs:</strong> None.</li>
+<li><strong>Backend/API:</strong> <code>POST /auth/refresh</code>, <code>GET /config</code>.</li>
+<li><strong>Data collected:</strong> App version, device model/OS, install ID (no advertising ID at this stage).</li>
+<li><strong>Next screens:</strong> AUTH-02, ONB-*, HOME-01, or Force-Update screen (SYS-01) / Maintenance screen (SYS-02).</li>
+<li><strong>Success state:</strong> Routes silently.</li>
+<li><strong>Empty state:</strong> N/A.</li>
+<li><strong>Error state:</strong> Network failure with valid local token → allow cached Home in offline mode (read-only) with banner; no token + no network → AUTH-02 will show offline banner.</li>
+<li><strong>Edge cases:</strong> Token revoked (suspicious login) → AUTH-05 with "Your session ended. Please log in again"; app version below minimum → SYS-01; account suspended → SAFE-10 (account status screen); account pending deletion → SET-09 (restore option).</li>
+<li><strong>Analytics:</strong> <code>app_opened</code>, <code>session_restored</code>, <code>session_restore_failed</code>.</li>
+<li><strong>Release:</strong> MVP · <strong>[SUPPORT]</strong></li>
+</ul>
+<h3 id="auth-02-welcome">AUTH-02 — Welcome</h3>
+<ul>
+<li><strong>Purpose:</strong> State the promise in one line, and get the user into sign-up with minimal friction.</li>
+<li><strong>Who sees it:</strong> Logged-out users.</li>
+<li><strong>Entry point:</strong> AUTH-01, or after logout.</li>
+<li><strong>UI components:</strong></li>
+<li>Headline: <strong>"Find your people. Do things together."</strong> (test variants: "Stop swiping. Start doing things together." / "Make a social circle in your new city.")</li>
+<li>Sub-line: "Small local groups around what you enjoy."</li>
+<li>3 rotating illustration cards (Circle of 5 at a badminton court; movie night; photography walk) showing <em>activities, not faces of models</em>.</li>
+<li>Primary button: <strong>Get started</strong>.</li>
+<li>Secondary text link: <strong>I already have an account</strong>.</li>
+<li>Footer: "By continuing you agree to Terms and Privacy Policy" (links). 18+ statement: "LIGHT is for people 18 and over."</li>
+<li>Language toggle (English / Hinglish; more later) top right.</li>
+<li><strong>Why each element exists:</strong> One headline reduces cognitive load; activity imagery signals "not a swipe app"; explicit 18+ line sets expectation before data entry; language toggle respects Indian multilingual use.</li>
+<li><strong>Primary CTA:</strong> Get started → AUTH-03.</li>
+<li><strong>Secondary:</strong> Login → AUTH-05; language toggle.</li>
+<li><strong>Backend:</strong> None (content via remote config).</li>
+<li><strong>Data collected:</strong> Referral/deep-link parameters (host ID, Circle ID) stored to attribute the install and pre-select the Circle post-onboarding.</li>
+<li><strong>Next:</strong> AUTH-03, AUTH-05.</li>
+<li><strong>Error:</strong> Offline banner "You're offline. Connect to continue."</li>
+<li><strong>Edge cases:</strong> Arrived via Circle invite link → show a compact card "You're invited to <em>Sunday Badminton · Koramangala</em>" above the CTA; after onboarding land on that Circle.</li>
+<li><strong>Analytics:</strong> <code>welcome_viewed</code> (variant), <code>get_started_tapped</code>, <code>login_tapped</code>, <code>language_changed</code>.</li>
+<li><strong>Release:</strong> MVP · <strong>[CORE]</strong> (first conversion point)</li>
+</ul>
+<hr />
+<h1 id="part-4-authentication">PART 4 — AUTHENTICATION</h1>
+<p><strong>Method decision:</strong> Phone number + OTP is the primary method (India-first; most users have one phone, phone verification also raises the cost of fake accounts). Google/Apple sign-in are <strong>optional secondary</strong> methods that still require phone verification afterward (Apple sign-in is required on iOS if any third-party social login is offered). Email is collected later, for recovery only. Passwords are not used in MVP.</p>
+<blockquote>
+<p>OTP delivery in India (DLT registration, sender IDs, templates, cost per SMS, fallback to WhatsApp/voice) is an operational dependency. Register early; plan a vendor with fallback channels.</p>
+</blockquote>
+<h2 id="auth-state-machine">Auth state machine</h2>
+<pre><code class="language-text">[Logged out]
+   │ enter phone
+   ▼
+[Phone submitted] ─ invalid format ─→ inline error
+   │ send OTP
+   ▼
+[OTP sent] ─ wrong OTP (attempts&lt;5) ─→ [OTP sent] +error
+   │            ─ attempts=5 ─→ [Locked 15 min]
+   │            ─ expired (10 min) ─→ [OTP expired] → resend
+   │ correct OTP
+   ▼
+[Phone verified]
+   ├─ phone exists, onboarding done ─→ [Logged in] → HOME
+   ├─ phone exists, onboarding incomplete ─→ resume ONB
+   ├─ phone exists, suspended ─→ SAFE-10
+   ├─ phone exists, pending deletion ─→ SET-09 restore prompt
+   └─ new phone ─→ [New account] → ONB-01
+</code></pre>
+<h3 id="auth-03-phone-entry-sign-up-log-in-unified">AUTH-03 — Phone entry (Sign up / Log in unified)</h3>
+<ul>
+<li><strong>Purpose:</strong> Single entry: the backend decides new vs existing after OTP. This avoids "wrong screen" errors.</li>
+<li><strong>UI components:</strong> Country code selector (default +91), phone field (10 digits, numeric keypad, auto-format), primary <strong>Send OTP</strong>, "Continue with Google" / "Continue with Apple" (secondary buttons), consent checkbox-free line: "We'll text you a code. Message and data rates may apply."</li>
+<li><strong>Primary CTA:</strong> Send OTP.</li>
+<li><strong>User inputs:</strong> Phone number.</li>
+<li><strong>Backend:</strong> <code>POST /auth/otp/request {phone, channel: sms}</code>. Rate limits: 3 requests per phone per 15 min, 10 per device per day, IP throttling. Return <code>{request_id, resend_after_sec}</code> with a generic response regardless of whether the number exists (prevents account enumeration).</li>
+<li><strong>Data collected:</strong> Phone (hashed + encrypted), device ID, IP (for abuse only).</li>
+<li><strong>Next:</strong> AUTH-04.</li>
+<li><strong>Error state:</strong> Invalid number ("Enter a valid 10-digit mobile number"); rate limited ("Too many attempts. Try again in 12 minutes"); SMS provider down (auto-switch to backup provider; if all fail, show "We couldn't send a code. Try again or use email verification", email OTP fallback [V2]).</li>
+<li><strong>Edge cases:</strong> Number previously banned → generic "We can't create an account with this number" (no detail); virtual/VoIP numbers → flagged for stricter verification; dual-SIM users → clarify "the number this phone uses".</li>
+<li><strong>Analytics:</strong> <code>signup_started</code>, <code>otp_requested</code>, <code>social_login_tapped</code>.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="auth-04-otp-verification">AUTH-04 — OTP verification</h3>
+<ul>
+<li><strong>UI components:</strong> 6 individual digit boxes with auto-advance; Android SMS auto-read (SMS Retriever API); iOS one-time-code autofill; countdown "Resend in 0:30"; "Wrong number? Edit" link; primary button appears only when 6 digits entered (auto-submit acceptable).</li>
+<li><strong>States:</strong>
+  | State | UI | Recovery |
+  |---|---|---|
+  | Default | Boxes empty, timer running | — |
+  | Wrong OTP | Boxes shake, red text "That code isn't right. 4 tries left." | Retype |
+  | Attempts exhausted | "Too many tries. Try again in 15 minutes." Disable input | Wait; or contact support link |
+  | Expired | "This code expired. Send a new one." | Resend |
+  | Resend available | Timer done; "Resend code" (sms) + "Get code via call/WhatsApp" [V2] | Tap |
+  | Resend limit hit | "You've reached the limit. Try again later." | Wait |
+  | Network fail | Toast + retry, code preserved | Retry |
+  | Success | Boxes turn green briefly; route by state machine | — |</li>
+<li><strong>Backend:</strong> <code>POST /auth/otp/verify {request_id, code}</code> → <code>{access_token, refresh_token, account_state}</code>. OTP: 6 digits, 10-min TTL, single-use, stored hashed.</li>
+<li><strong>Data collected:</strong> Verified phone (creates <code>verifications</code> record type=phone).</li>
+<li><strong>Edge cases:</strong> User switches apps to read SMS and returns (preserve state); OTP typed after resend (invalidate previous OTP on resend); clipboard auto-paste suggestion.</li>
+<li><strong>Analytics:</strong> <code>otp_verified</code>, <code>otp_failed</code> (reason), <code>otp_resend_tapped</code>.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="auth-05-login-returning-user">AUTH-05 — Login (returning user)</h3>
+<p>Same UI as AUTH-03 with header "Welcome back." After OTP success, route by <code>account_state</code>. Adds <strong>"Log in on this device?"</strong> notification to other active devices [V2] (see Suspicious login below).</p>
+<h3 id="existing-vs-new-account">Existing vs new account</h3>
+<p>Handled <em>after</em> OTP by the server. If a user signs up with Google that maps to a phone already registered, prompt "This Google account is linked to a different LIGHT account. Verify the phone to link." Never merge accounts automatically.</p>
+<h3 id="auth-06-account-recovery-lost-phone-number">AUTH-06 — Account recovery (lost phone number)</h3>
+<ul>
+<li><strong>Purpose:</strong> User no longer has access to registered phone.</li>
+<li><strong>Flow:</strong> "Can't access this number?" → enter recovery email (if previously verified) → email magic link/OTP → verify new phone by OTP → old sessions revoked → security notification email. If no recovery email: submit support request with selfie liveness match to the account's verified photo (if photo-verified) → manual review, 48h SLA.</li>
+<li><strong>Abuse prevention:</strong> 24-hour cooldown before recovered account can send Connection requests or create Circles; email + push notice to all prior devices.</li>
+<li><strong>Release:</strong> MVP for email path; support-assisted for others.</li>
+</ul>
+<h3 id="suspicious-login-multi-device">Suspicious login &amp; multi-device</h3>
+<ul>
+<li>Triggers: new device + new city/IP class; many failed OTPs; SIM-swap heuristics (rapid device change after phone re-registration).</li>
+<li>Response: step-up challenge (email OTP or liveness selfie if photo-verified); push to other devices "New login from Mumbai. Not you? Log out everywhere."</li>
+<li><strong>Sessions screen</strong> (SET-06): list of devices, last active, "Log out of this device", "Log out of all devices". MVP: max 2 concurrent devices.</li>
+<li><strong>Token model:</strong> Access token 15 min; refresh token 30 days rotating; revoked on password/phone change, on "log out everywhere", and on ban.</li>
+</ul>
+<hr />
+<h1 id="part-5-age-identity">PART 5 — AGE &amp; IDENTITY</h1>
+<h2 id="51-field-matrix">5.1 Field matrix</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Mandatory</th>
+<th>Who sees it</th>
+<th>Used for recommendations</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phone</td>
+<td>Yes</td>
+<td>Nobody</td>
+<td>No (abuse only)</td>
+<td>Never shown, never shared</td>
+</tr>
+<tr>
+<td>Date of birth</td>
+<td>Yes</td>
+<td><strong>Nobody</strong> (age band/age shown)</td>
+<td>Yes</td>
+<td>Stored precisely; displayed as age (or hidden band if user chooses)</td>
+</tr>
+<tr>
+<td>Display name</td>
+<td>Yes</td>
+<td>Everyone in shared Circle</td>
+<td>No</td>
+<td>Can be first name / nickname / pseudonym; unique-ish not required</td>
+</tr>
+<tr>
+<td>Gender</td>
+<td>Optional-but-prompted (needed for women-only Circles and dating)</td>
+<td>Only if user chooses</td>
+<td>Yes (only for user-selected filters)</td>
+<td>Options: Woman, Man, Non-binary, Prefer to self-describe, Prefer not to say</td>
+</tr>
+<tr>
+<td>Pronouns</td>
+<td>Optional</td>
+<td>Public if provided</td>
+<td>No</td>
+<td>Free-form suggestions</td>
+</tr>
+<tr>
+<td>Sexual orientation</td>
+<td>Optional, <strong>dating-intent only</strong>, prompted only when Dating chosen</td>
+<td>Private; used only to compute who is eligible for dating escalation</td>
+<td>Yes (eligibility only)</td>
+<td>Never displayed publicly; special-category-like sensitivity — treat as high-sensitivity data</td>
+</tr>
+<tr>
+<td>Intent</td>
+<td>Yes</td>
+<td>Private until mutual escalation</td>
+<td>Yes</td>
+<td>Changeable</td>
+</tr>
+<tr>
+<td>City + zone</td>
+<td>Yes</td>
+<td>City + zone name to everyone</td>
+<td>Yes</td>
+<td>Never exact coordinates</td>
+</tr>
+<tr>
+<td>Languages</td>
+<td>Optional</td>
+<td>Public</td>
+<td>Yes</td>
+<td>e.g., English, Hindi, Kannada…</td>
+</tr>
+<tr>
+<td>Interests</td>
+<td>Yes (≥3)</td>
+<td>Public (top 3–5)</td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td>Photos</td>
+<td>1 required for profile</td>
+<td>Circle members; broader after connection</td>
+<td>No</td>
+<td></td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Optional (prompted for recovery)</td>
+<td>Nobody</td>
+<td>No</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="52-under-age-handling">5.2 Under-age handling</h2>
+<ul>
+<li><strong>Minimum age: 18.</strong> (India's DPDP Act defines a child as under 18 and requires verifiable parental consent for processing children's data; avoiding minors removes that regime and much safety complexity.)</li>
+<li><strong>ONB-01 flow:</strong> DOB picker → if under 18: "LIGHT is for people 18 and over. We can't create an account for you." No continue button; <strong>no data stored</strong> beyond a short-lived device-level block flag (to prevent immediate retry with a different DOB). Do not reveal the block reason on retry (show the same message).</li>
+<li><strong>Age assurance layering:</strong> self-declared DOB (MVP) + photo-based age estimation at photo upload (flag/queue if estimated &lt; 21 with a confidence threshold, to be tuned) + report-driven review. Underage account discovered → immediate suspension, data deletion, moderation log entry.</li>
+<li><strong>Adult-minor pairing:</strong> No product feature should ever match by age proximity below 18. Age preferences are bounded 18+.</li>
+</ul>
+<h2 id="53-verification-tiers-summary-details-in-part-8">5.3 Verification tiers (summary; details in Part 8)</h2>
+<p>Phone verified (mandatory) → Photo verified (selfie liveness vs profile photo) → Optional ID/student/workplace (V2).</p>
+<h2 id="54-privacy-controls-at-identity-level">5.4 Privacy controls at identity level</h2>
+<ul>
+<li>Hide exact age (show "20s")</li>
+<li>Hide last name (never collected)</li>
+<li>Hide workplace/college (never collected in MVP)</li>
+<li>Hide from People discovery (Circle-only visibility)</li>
+<li>Pseudonymous display name allowed</li>
+<li>Profile photo visibility: Circle members / Connections only</li>
+<li>Download/erase data (SET-08)</li>
+</ul>
+<hr />
+<h1 id="part-6-onboarding-screen-by-screen">PART 6 — ONBOARDING (screen by screen)</h1>
+<p><strong>Design rules</strong>
+1. Onboarding should take ≤ 4 minutes and ≤ 9 screens to first value (Home with real recommendations).
+2. Every question must change the next recommendation or a safety setting. If it doesn't, it's not asked.
+3. Progress bar; back allowed at every step; answers autosaved server-side after each step (<code>PUT /onboarding/{step}</code>) so drop-off can be resumed.
+4. Skippable steps get "Skip for now" and are re-prompted contextually later (e.g., availability prompt when joining a Circle).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Screen</th>
+<th>Skippable</th>
+<th>Why it exists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ONB-01</td>
+<td>Age/DOB (+ gender, optional)</td>
+<td>No (DOB)</td>
+<td>Legal/safety gate</td>
+</tr>
+<tr>
+<td>ONB-02</td>
+<td>Intent</td>
+<td>No</td>
+<td>Drives escalation rules</td>
+</tr>
+<tr>
+<td>ONB-03</td>
+<td>Interests</td>
+<td>No (min 3)</td>
+<td>Primary recommendation signal</td>
+</tr>
+<tr>
+<td>ONB-04</td>
+<td>Specific tastes</td>
+<td><strong>Yes</strong></td>
+<td>Improves conversation prompts</td>
+</tr>
+<tr>
+<td>ONB-05</td>
+<td>Social style</td>
+<td>No (4 quick taps)</td>
+<td>Group size and format fit</td>
+</tr>
+<tr>
+<td>ONB-06</td>
+<td>Location</td>
+<td>No (manual fallback)</td>
+<td>Local product</td>
+</tr>
+<tr>
+<td>ONB-07</td>
+<td>Availability</td>
+<td><strong>Yes</strong></td>
+<td>Activity fit</td>
+</tr>
+<tr>
+<td>ONB-08</td>
+<td>Safety &amp; privacy setup</td>
+<td>No (defaults preset; must view)</td>
+<td>Sets trust defaults</td>
+</tr>
+<tr>
+<td>ONB-09</td>
+<td>Profile</td>
+<td>Partly (name + 1 photo needed)</td>
+<td>Identity in Circles</td>
+</tr>
+<tr>
+<td>ONB-10</td>
+<td>Verification nudge</td>
+<td><strong>Yes</strong></td>
+<td>Trust tier</td>
+</tr>
+<tr>
+<td>ONB-11</td>
+<td>Building recommendations</td>
+<td>No (auto)</td>
+<td>Transition</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="onb-01-age-basics">ONB-01 — Age &amp; basics</h3>
+<ul>
+<li><strong>Purpose:</strong> Age gate; capture gender for eligibility filters.</li>
+<li><strong>UI:</strong> DOB picker (day/month/year wheels, not free text), gender chips (Woman / Man / Non-binary / Self-describe / Prefer not to say) with "Why we ask" info link: "Used only for women-only Circles and dating eligibility. Never shown unless you choose."</li>
+<li><strong>Action → Data → Backend → Next:</strong> Select DOB + gender → <code>dob</code>, <code>gender</code> → <code>PUT /onboarding/basics</code> (server computes age; rejects &lt;18) → ONB-02, or ONB-01b block screen.</li>
+<li><strong>Edge:</strong> Users try multiple DOBs → device-level lock 24h after under-18 entry. Leap-year and future dates validated.</li>
+<li><strong>Analytics:</strong> <code>age_gate_passed</code>, <code>age_gate_blocked</code> (no DOB logged).</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-02-what-are-you-here-for">ONB-02 — What are you here for?</h3>
+<ul>
+<li><strong>UI:</strong> Four large selectable cards (multi-select): <strong>Make friends</strong>, <strong>Meet someone (dating)</strong>, <strong>Find people for activities</strong>, <strong>Not sure yet</strong>. Under each, one line of plain-language description. Below: "You can change this anytime. It's private."</li>
+<li><strong>Note on "Communities" and "Events" from your brief:</strong> These are <em>places to do those things</em>, not intents. Everyone gets communities/activities; the intent only governs how connections escalate.</li>
+<li><strong>Data:</strong> <code>intent[]</code>. <strong>Backend:</strong> <code>PUT /onboarding/intent</code>. <strong>Logic:</strong> Selecting Dating triggers an optional follow-up sheet: "Who would you be open to meeting?" (Women / Men / Everyone / Skip) plus optional orientation label. Data flagged high-sensitivity; used only for dating eligibility.</li>
+<li><strong>Next:</strong> ONB-03.</li>
+<li><strong>Edge:</strong> "Not sure" + others selected → treat as union; "Not sure" alone → prompt again after third completed Activity.</li>
+<li><strong>Analytics:</strong> <code>intent_selected</code> (values).</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-03-interests">ONB-03 — Interests</h3>
+<ul>
+<li><strong>UI:</strong> Search bar + grouped chips, activity-oriented (not identity labels). Groups: <strong>Sports &amp; movement</strong> (Badminton, Cricket box, Running, Football, Gym, Cycling, Trekking), <strong>Screens</strong> (Movies, Anime, Web series, Gaming, Board games), <strong>Creative</strong> (Photography, Music jamming, Art, Writing), <strong>Culture &amp; food</strong> (Cafés, Street food, Bollywood, Regional cinema, Book club), <strong>Tech &amp; learning</strong> (Coding, Startups, Languages). Show 5–15 selectable; min 3; "Pick your top 3" star mark.</li>
+<li><strong>Behavioral over generic:</strong> offer both levels — tapping "Music" expands to "Indie gigs", "Playing an instrument", "Carnatic/Hindustani", "Hip-hop", "Bollywood nights".</li>
+<li><strong>Data:</strong> <code>user_interests {interest_id, rank, level (curious/regular/enthusiast)}</code>. Optional 3-way chip: "Just curious / Regular / Deep into it".</li>
+<li><strong>Backend:</strong> <code>PUT /onboarding/interests</code>.</li>
+<li><strong>Cold-start behavior:</strong> Show live count "27 people near you into badminton" only if ≥ 5 (avoid displaying zero, which discourages). If &lt;5: "We're just starting in your area. Be one of the first."</li>
+<li><strong>Analytics:</strong> <code>interest_selected</code>, <code>interest_removed</code>, <code>interests_completed</code>.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-04-your-taste-skippable">ONB-04 — Your taste (skippable)</h3>
+<ul>
+<li><strong>UI:</strong> 3–5 optional fill-ins with autocomplete from a curated catalog (with free text fallback): "Artist you can't stop playing", "A film you can rewatch", "A game you've lost hours to", "A book that stuck", "Team you support".</li>
+<li><strong>Data:</strong> <code>user_taste_items {category, catalog_id | free_text}</code>.</li>
+<li><strong>Backend:</strong> Entity search <code>GET /catalog/search?type=film&amp;q=</code>. Catalog source: licensed metadata provider (TMDB-type sources have licensing/attribution terms; verify).</li>
+<li><strong>Why:</strong> Powers conversation prompts and "why you two" explanations, not primary ranking.</li>
+<li><strong>Release:</strong> MVP (skippable).</li>
+</ul>
+<h3 id="onb-05-social-style">ONB-05 — Social style</h3>
+<ul>
+<li><strong>UI:</strong> Four single-tap questions, each with 2–3 illustrated options:
+  1. Group size: 2–3 / 4–6 / 7–10 / No preference
+  2. Energy: Mostly quiet / Balanced / Very social
+  3. Format: Talk-focused / Activity-focused / Both
+  4. Planning: Planned / Spontaneous / Either
+  Plus: <strong>Online first, or straight to meeting?</strong> (Online chat first / Happy to meet at an activity / Either)</li>
+<li><strong>Data:</strong> <code>social_style</code> object. <strong>Backend:</strong> <code>PUT /onboarding/style</code>.</li>
+<li><strong>Why:</strong> Group size and online-first preference directly affect Circle matching and reduce activity no-shows for anxious users. Do <strong>not</strong> display any "introvert/extrovert" label publicly.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-06-location">ONB-06 — Location</h3>
+<ul>
+<li><strong>UI:</strong> Explainer card first ("We use your area to show nearby Circles. We never show your exact location.") → <strong>Allow while using app</strong> (system prompt) → coarse location → reverse-geocoded to <strong>city + zone</strong> (zones are predefined polygons, e.g., "Koramangala / HSR / Indiranagar" — server-side, coordinates then discarded or rounded to ~2 km grid).</li>
+<li><strong>Fallback (denied/unavailable):</strong> Manual city dropdown + zone multi-select (up to 3 zones) + travel tolerance ("Up to 5 km / 10 km / anywhere in the city").</li>
+<li><strong>Data:</strong> <code>city_id</code>, <code>zone_ids[]</code>, <code>radius_pref</code>. No raw GPS stored by default.</li>
+<li><strong>Backend:</strong> <code>PUT /onboarding/location</code>.</li>
+<li><strong>Edge:</strong> City not yet supported → waitlist screen (email/phone already known) + share link; user may still explore online Circles [V2].</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-07-availability-skippable">ONB-07 — Availability (skippable)</h3>
+<ul>
+<li><strong>UI:</strong> Grid: Weekday mornings / weekday evenings / Saturday / Sunday × time bands, tap to toggle; "Flexible" shortcut.</li>
+<li><strong>Data:</strong> <code>availability_slots</code>. <strong>Why:</strong> Activity scheduling and RSVP suggestions.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-08-safety-privacy-setup">ONB-08 — Safety &amp; privacy setup</h3>
+<ul>
+<li><strong>Purpose:</strong> Make safe defaults visible and set the user's boundaries before they meet anyone.</li>
+<li><strong>UI:</strong> Single scrollable screen with pre-set toggles and plain-language explanations:</li>
+<li>"Only verified members can message me after we connect" (default ON for women/non-binary users; optional for others) [proposal]</li>
+<li>"Show my profile only to people in my Circles" (default ON)</li>
+<li>"Hide my exact age" (default OFF)</li>
+<li>"Women-only Circles: show me" toggle (visible if gender ≠ man)</li>
+<li>"Share my activity check-in with a trusted contact" (opt-in; sets up Trusted Contact — name + phone; no app signup needed)</li>
+<li>Community guidelines: 5 rules with acknowledgement "I agree to respect these" (button).</li>
+<li><strong>Data:</strong> <code>privacy_settings</code>, <code>trusted_contact</code> (encrypted). <strong>Consent record:</strong> store consent artifacts with timestamps and policy version for data processing (DPDP-style notice + purpose).</li>
+<li><strong>Backend:</strong> <code>PUT /me/privacy</code>, <code>POST /me/consents</code>.</li>
+<li><strong>Release:</strong> MVP. Trusted contact can be V2 if capacity is tight, but the safe-default toggles are MVP.</li>
+</ul>
+<h3 id="onb-09-create-profile">ONB-09 — Create profile</h3>
+<ul>
+<li><strong>UI:</strong> Display name; <strong>one</strong> photo (camera or gallery; on-device crop; face-detected check); "One line about you" (max 100 chars, with examples: "New to Bengaluru, badminton and slow mornings"); optional <strong>3 prompts</strong> (can skip). Interests auto-populated from ONB-03. Live preview card "How Circle members see you".</li>
+<li><strong>Photo rules:</strong> must contain one detectable face for the main photo; no nudity (on-upload classifier + human queue); no children; no third-party watermarks; no screenshots of other profiles (reverse-image check against known bad hashes) [V2].</li>
+<li><strong>Backend:</strong> <code>POST /media/upload-url</code> (pre-signed) → upload → <code>POST /me/profile</code> → async moderation.</li>
+<li><strong>Edge:</strong> Photo rejected → "This photo doesn't meet our guidelines. Choose one where your face is clearly visible." Do not disclose the classifier.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="onb-10-verify-to-unlock-more">ONB-10 — Verify to unlock more</h3>
+<ul>
+<li><strong>UI:</strong> Card: "Get the verified badge (takes 30 seconds). Verified members can join more Circles and are more likely to be accepted." Selfie flow (liveness). Buttons: <strong>Verify now</strong> / <strong>Later</strong>.</li>
+<li><strong>Release:</strong> MVP (photo verification), see Part 8.</li>
+</ul>
+<h3 id="onb-11-building-your-recommendations">ONB-11 — Building your recommendations</h3>
+<ul>
+<li><strong>UI:</strong> 2–3 second interstitial with progress copy ("Looking for Circles near Koramangala…"). Not fake loading: reflects the recommendation call. Timeout at 6s → fall back to generic top Circles in the zone.</li>
+<li><strong>Backend:</strong> <code>POST /recommendations/bootstrap</code> — generates ranked Circle/Activity list; caches for Home.</li>
+<li><strong>Next:</strong> HOME-01 (or invited Circle page if arrival via link).</li>
+</ul>
+<hr />
+<h1 id="part-7-profile-creation">PART 7 — PROFILE CREATION</h1>
+<h2 id="71-what-belongs-on-a-profile-and-what-doesnt">7.1 What belongs on a profile (and what doesn't)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Include</th>
+<th>Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Display name, age (or band), city/zone</td>
+<td>Yes</td>
+<td>Public to Circle members</td>
+</tr>
+<tr>
+<td>Main photo (+ up to 4 more, MVP allows 3)</td>
+<td>Yes</td>
+<td>Circle members; full set after connection</td>
+</tr>
+<tr>
+<td>One-liner</td>
+<td>Yes</td>
+<td>Public to Circle members</td>
+</tr>
+<tr>
+<td>Top interests (3–5)</td>
+<td>Yes</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Shared Circles (with viewer)</td>
+<td>Yes (computed)</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Taste items (artist/film/game)</td>
+<td>Yes, 3 max shown</td>
+<td>Public (selective)</td>
+</tr>
+<tr>
+<td>Social style summary ("Small groups, activity-focused")</td>
+<td>Yes</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Verification badges</td>
+<td>Yes</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Activity history ("Went to 6 activities · Host of 2")</td>
+<td>Yes (aggregates only)</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Intent</td>
+<td><strong>Private</strong> until mutual escalation</td>
+<td></td>
+</tr>
+<tr>
+<td>Dating preferences/orientation</td>
+<td><strong>Private / matching-only</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>Matching-only</td>
+<td></td>
+</tr>
+<tr>
+<td>Exact location, phone, email</td>
+<td>Never shown</td>
+<td></td>
+</tr>
+<tr>
+<td>Social links (Instagram etc.)</td>
+<td><strong>Not in MVP.</strong> [BLOAT for now] — enables off-platform stalking. Later: shareable only inside an accepted connection.</td>
+<td></td>
+</tr>
+<tr>
+<td>Long bio, favorite books/shows lists, personality quizzes</td>
+<td><strong>Not in MVP</strong> [BLOAT/FUTURE]</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="72-four-profile-views">7.2 Four profile views</h2>
+<ol>
+<li><strong>Public profile (PROF-01):</strong> what a Circle member or Connection-request recipient sees (above).</li>
+<li><strong>Private information:</strong> settings-only data (DOB, phone, email, orientation, trusted contact).</li>
+<li><strong>Matching-only:</strong> availability, intent, group-size preferences, behavior signals — used by the recommender; visible to the user under "What we use to recommend" (transparency screen SET-05a).</li>
+<li><strong>Community/Circle-specific profile (V2):</strong> optional per-Circle display name and one-liner (allows pseudonymity in a community while keeping a real-ish global profile).</li>
+</ol>
+<h3 id="prof-01-my-profile-prof-02-other-users-profile">PROF-01 — My profile / PROF-02 — Other user's profile</h3>
+<ul>
+<li><strong>My profile:</strong> Header with photo carousel, name, age, zone; badges; edit pencil; "Preview as Circle member"; completeness meter framed by benefit ("Add a second photo — Circles with photos fill faster"), not by guilt.</li>
+<li><strong>Other user's profile (PROF-02):</strong> Photo, name, age, zone, one-liner, "Why you might get along" block (3 shared facts, e.g., <em>2 shared Circles, Both like indie gigs, Both prefer small groups</em>), interests, badges, activity history summary. <strong>Actions:</strong> Connect (if eligible), Invite to Activity, Save, Block/Report (⋯ menu).</li>
+<li>No "Like"/"Pass" buttons; no distance in km (only zone).</li>
+<li><strong>Eligibility to connect:</strong> must share at least one Circle or Activity with the viewer in MVP (<strong>"earned proximity"</strong> rule). This is the anti-cold-DM mechanism.</li>
+<li><strong>States:</strong> Loading skeleton; deleted/suspended user → "This profile isn't available"; blocked → not reachable; profile hidden → not found.</li>
+<li><strong>Analytics:</strong> <code>profile_viewed</code> (source), <code>profile_edit_saved</code>, <code>photo_uploaded</code>.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<hr />
+<h1 id="part-8-profile-verification">PART 8 — PROFILE VERIFICATION</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Verification</th>
+<th>Purpose</th>
+<th>User flow</th>
+<th>Privacy</th>
+<th>Abuse prevention</th>
+<th>UI</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phone</strong></td>
+<td>Uniqueness, cost of fake accounts</td>
+<td>OTP (AUTH-04)</td>
+<td>Hashed+encrypted; never displayed</td>
+<td>Block VoIP/temporary numbers; per-device limits</td>
+<td>Small check on profile</td>
+<td>MVP (mandatory)</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>Recovery, receipts</td>
+<td>Enter email → link/OTP</td>
+<td>Never shown</td>
+<td>Disposable-domain blocklist</td>
+<td>Settings only</td>
+<td>MVP (optional)</td>
+</tr>
+<tr>
+<td><strong>Photo (liveness)</strong></td>
+<td>Real person matches photo</td>
+<td>Follow on-screen head-turn/blink prompt; server compares to profile photo; low confidence → human review</td>
+<td>Selfie processed by vendor; store only pass/fail + embedding-free reference where possible; delete raw selfie within a short window (define retention, e.g., 30 days)</td>
+<td>Random challenge prompts; deepfake/replay detection from vendor; limit retries (3/day)</td>
+<td>Blue check badge "Photo verified"</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Government ID</strong></td>
+<td>High-trust identity for hosts</td>
+<td>Vendor-mediated ID scan</td>
+<td>Do <strong>not</strong> store ID image; store vendor reference + pass/fail. Note Aadhaar-specific rules — use only approved/legal methods; avoid Aadhaar number collection</td>
+<td>Name match to display name is <em>not</em> required (pseudonyms allowed)</td>
+<td>"ID checked" badge, hosts only</td>
+<td>V2</td>
+</tr>
+<tr>
+<td><strong>Community verified</strong></td>
+<td>Trusted member of a Circle</td>
+<td>Automatic: after N attended activities with no reports</td>
+<td>Computed</td>
+<td>Not purchasable</td>
+<td>"Active member" badge</td>
+<td>MVP (computed)</td>
+</tr>
+<tr>
+<td><strong>Student</strong></td>
+<td>Campus features</td>
+<td>College email domain or ID</td>
+<td>Store domain hash</td>
+<td>Domain allowlist</td>
+<td>"Student" chip (opt-in)</td>
+<td>V3</td>
+</tr>
+<tr>
+<td><strong>Workplace</strong></td>
+<td>Professional trust</td>
+<td>Work email link</td>
+<td>Store domain only</td>
+<td>Domain allowlist</td>
+<td>Opt-in</td>
+<td>V3 [BLOAT for MVP]</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MVP verification set:</strong> Phone (required) → Photo (strongly nudged, required for: hosting Circles, women-only Circle membership, and sending Connection requests).</p>
+<h3 id="gating-table-proposal">Gating table (proposal)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Unverified</th>
+<th>Photo-verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browse Circles/Activities</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Join Circle (open)</td>
+<td>✓ (up to 2)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Join verified-only Circle</td>
+<td>✗</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Send connection request</td>
+<td>✗</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Create Circle / Activity</td>
+<td>✗</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Receive requests</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="prof-03-verify-photo-screen">PROF-03 — Verify photo (screen)</h3>
+<p>Purpose: liveness check. Components: camera preview with oval guide, prompt text ("Turn head slowly left"), progress ring, privacy line ("We use your selfie only to confirm it's you"), fallback ("Can't verify? Contact support"). <strong>Errors:</strong> low light, face not detected, mismatch (→ retry ×3 → human review 24–48h), vendor timeout (retry). <strong>Analytics:</strong> <code>verification_started</code>, <code>verification_passed</code>, <code>verification_failed</code>.</p>
+<hr />
+<h1 id="part-9-home-screen">PART 9 — HOME SCREEN</h1>
+<p><strong>Principle:</strong> Home is not a feed. It answers one question: <strong>"What could I do with people like me this week?"</strong></p>
+<h3 id="home-01-home">HOME-01 — Home</h3>
+<ul>
+<li><strong>Purpose:</strong> Convert intent into action within 2 taps.</li>
+<li><strong>Who sees it:</strong> All authenticated, onboarded users.</li>
+<li><strong>Layout (top → bottom):</strong>
+  1. Header: greeting + zone chip ("Koramangala ▾" tap to change), bell (notifications), no coins/likes.
+  2. <strong>"Your next thing"</strong> (single hero card, only if you have an upcoming activity): activity title, time, meeting point (venue name shown only after RSVP), attendees' avatars, <strong>Open</strong> / check-in button when within window.
+  3. <strong>"This week for you"</strong> — 3–5 cards (Circle or Activity). Each card: title, zone, day/time, group fill ("4/6 joined"), "Why for you" line, <strong>Join</strong> / <strong>Request</strong>.
+  4. <strong>"Your Circles"</strong> — horizontal list with unread and next-meeting dot.
+  5. <strong>"Waiting for you"</strong> — max 3 items: connection requests, "keep in touch?" prompts, pending RSVP confirmations.
+  6. <strong>"Start something"</strong> — subtle card to create a Circle/Activity (only for photo-verified users with ≥1 attended activity, or via "Become a host" flow).</li>
+<li><strong>Primary CTA:</strong> Join (on top recommended card). <strong>Secondary:</strong> Explore more (→ DISC-01), Create.</li>
+<li><strong>Personalization:</strong> Ranking = fit(interests, availability, zone, group-size) × freshness × fill-urgency. Daily cap on recommendation changes to avoid a slot-machine feel. Explanatory line on every card.</li>
+<li><strong>States:</strong>
+  | State | Content |
+  |---|---|
+  | New user (no Circles) | Top: "Start with one thing this week" + 3 curated cards; friendly first-join tip |
+  | Returning user with Circles | Next-thing hero + Your Circles first |
+  | No recommendations in zone | "No Circles for your interests nearby yet." CTAs: <strong>Join waitlist for {interest}</strong>, <strong>Broaden area</strong>, <strong>Start one</strong> |
+  | Loading | Skeleton cards |
+  | Error | Cached content + banner "Couldn't refresh. Pull to retry" |
+  | Suspended/limited | Banner linking SAFE-10 |</li>
+<li><strong>Backend:</strong> <code>GET /home</code> (aggregates hero, recs, circles, waiting items).</li>
+<li><strong>Data collected:</strong> Card impressions/taps (for recommender learning).</li>
+<li><strong>Edge cases:</strong> Activity cancelled → card replaced + push; user already at capacity; timezone changes when traveling.</li>
+<li><strong>Analytics:</strong> <code>home_viewed</code>, <code>home_card_impression</code>, <code>home_card_tapped</code>, <code>join_tapped</code>.</li>
+<li><strong>What Home must NOT contain:</strong> infinite feed, like counts, "people who viewed you", trending posts, streak gamification. [BLOAT]</li>
+<li><strong>Release:</strong> MVP · <strong>[CORE]</strong></li>
+</ul>
+<hr />
+<h1 id="part-10-discovery">PART 10 — DISCOVERY</h1>
+<h3 id="disc-01-discover-hub">DISC-01 — Discover hub</h3>
+<ul>
+<li><strong>Tabs (segmented control):</strong> <strong>Circles</strong> · <strong>Activities</strong> · <strong>Communities</strong> · <strong>People</strong> (People tab is V2; MVP shows "People in your Circles" in Circle pages instead).</li>
+<li><strong>Top controls:</strong> Search (compact), filter chip row (Zone, Day, Interest, Group size, Verified-only, Women-only, Free/Paid).</li>
+<li><strong>Discovery flows:</strong></li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Flow</th>
+<th>Entry</th>
+<th>Result</th>
+<th>MVP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circles</td>
+<td>Tab or Home "See more"</td>
+<td>Ranked list with "Why for you"</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Activities</td>
+<td>Tab</td>
+<td>Time-ordered list/calendar toggle</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Communities</td>
+<td>Tab</td>
+<td>Local interest hubs (e.g., "Photography · Bengaluru"): description, active Circles, upcoming Activities, members count (no follower counts)</td>
+<td>✓ (light)</td>
+</tr>
+<tr>
+<td>Interests</td>
+<td>Tap any interest chip anywhere</td>
+<td>Interest landing page: Circles + Activities for that interest</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>People</td>
+<td>Tab</td>
+<td>Curated weekly set (max 5 per week) from shared Circles/communities</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>Local experiences</td>
+<td>Partner venues/hosts</td>
+<td>Curated list (cafés, courts)</td>
+<td>V3</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Empty / error / loading:</strong> see Part 28/29.</li>
+<li><strong>Release:</strong> MVP (Circles, Activities, light Communities).</li>
+</ul>
+<hr />
+<h1 id="part-11-people-discovery">PART 11 — PEOPLE DISCOVERY</h1>
+<p><strong>Decision: no swipe deck.</strong> People are discovered <em>through shared context</em>, in this order of preference: (1) members of a Circle/Activity you're in; (2) members of Communities you follow; (3) V2: a curated weekly "People you might vibe with" list of ≤5 with explicit reasons.</p>
+<h3 id="person-card-disc-03-contents">Person card (DISC-03) contents</h3>
+<p>Photo, name, age, zone; badges; 3 "why" facts; social-style chips; shared Circles count; last-active bucket ("Active this week"); actions.</p>
+<h3 id="action-inventory-which-actions-should-exist">Action inventory (which actions should exist)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Decision</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Connect</strong> (request)</td>
+<td><strong>Keep [CORE]</strong></td>
+<td>Only 1:1 pathway; requires shared context</td>
+</tr>
+<tr>
+<td><strong>Like / Pass swipes</strong></td>
+<td><strong>Do not build</strong> [BLOAT]</td>
+<td>Reintroduces appearance-first swiping</td>
+</tr>
+<tr>
+<td><strong>Follow</strong></td>
+<td><strong>Do not build</strong> [BLOAT]</td>
+<td>Social-media incentive; creates asymmetry</td>
+</tr>
+<tr>
+<td><strong>Invite to Activity</strong></td>
+<td>Keep (V2) [SUPPORT]</td>
+<td>Lower-pressure than a DM; group-first</td>
+</tr>
+<tr>
+<td><strong>Message (direct)</strong></td>
+<td><strong>Not available</strong> except after mutual connection</td>
+<td>Prevents unsolicited DMs</td>
+</tr>
+<tr>
+<td><strong>Save</strong></td>
+<td>Keep (MVP-light) — private bookmark; no notification to other person</td>
+<td>Decision support</td>
+</tr>
+<tr>
+<td><strong>Hide / Not interested</strong></td>
+<td>Keep [SUPPORT]</td>
+<td>Feeds recommendation reset</td>
+</tr>
+<tr>
+<td><strong>Block / Report</strong></td>
+<td>Keep [SUPPORT]</td>
+<td>Safety</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="why-recommended-taxonomy">Why-recommended taxonomy</h3>
+<p>"You're both in {Circle}", "You both like {interest}", "You both prefer {group size}", "You're both free {slot}", "Joined the same Activity", "Same zone". Never show a percentage.</p>
+<h3 id="analytics-person_card_viewed-connect_tapped-person_hidden-person_saved">Analytics: <code>person_card_viewed</code>, <code>connect_tapped</code>, <code>person_hidden</code>, <code>person_saved</code>.</h3>
+<p><strong>Release:</strong> People-in-Circles MVP; curated People tab V2.</p>
+<hr />
+<h1 id="part-12-matching-recommendation-ui-interaction">PART 12 — MATCHING / RECOMMENDATION (UI interaction)</h1>
+<h2 id="121-inputs-and-outputs">12.1 Inputs and outputs</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interests + level</td>
+<td>Soft</td>
+<td>Onboarding</td>
+</tr>
+<tr>
+<td>Taste items</td>
+<td>Soft (for prompts)</td>
+<td>Onboarding</td>
+</tr>
+<tr>
+<td>Zone / radius</td>
+<td>Hard + soft</td>
+<td>Onboarding</td>
+</tr>
+<tr>
+<td>Intent</td>
+<td>Hard (for escalation eligibility)</td>
+<td>Onboarding</td>
+</tr>
+<tr>
+<td>Age preferences</td>
+<td>Hard (dating only, optional)</td>
+<td>Preferences</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>Soft</td>
+<td>Onboarding/behavior</td>
+</tr>
+<tr>
+<td>Social style (group size)</td>
+<td>Soft</td>
+<td>Onboarding</td>
+</tr>
+<tr>
+<td>Circle/Community membership</td>
+<td>Soft + graph</td>
+<td>Behavior</td>
+</tr>
+<tr>
+<td>Activity attendance, repeat co-attendance</td>
+<td>Strong soft (post-launch)</td>
+<td>Behavior</td>
+</tr>
+<tr>
+<td>Hides/blocks/reports</td>
+<td>Hard exclusion</td>
+<td>Safety</td>
+</tr>
+<tr>
+<td>Verification status</td>
+<td>Filter/boost</td>
+<td>Trust</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Outputs:</strong> ranked Circles, Activities, (V2) People, each with <code>reason_codes[]</code> for explanation.</p>
+<h2 id="122-rules-based-mvp-scoring-proposal">12.2 Rules-based MVP scoring (proposal)</h2>
+<p><code>score = w1·interest_overlap + w2·availability_overlap + w3·zone_fit + w4·group_size_fit + w5·circle_fill_urgency + w6·host_quality + w7·novelty − penalties</code> — weights hand-tuned; logged per impression for later learning-to-rank. No vector DB.</p>
+<h2 id="123-cold-start-and-states">12.3 Cold start and states</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New user, no behavior</td>
+<td>Rank purely on interests/zone/availability; ensure ≥1 Circle in top 3 is "beginner friendly"</td>
+</tr>
+<tr>
+<td>Low-activity user</td>
+<td>Nudge with lowest-friction options (small, near, soon)</td>
+</tr>
+<tr>
+<td>Highly active user</td>
+<td>Surface new Circles/hosts; suggest hosting; diversity injection (avoid same-people loop)</td>
+</tr>
+<tr>
+<td>Sparse zone</td>
+<td>Widen radius gradually; offer waitlist</td>
+</tr>
+<tr>
+<td>Feedback</td>
+<td>"Not for me" on cards with reason (time, topic, location, group size)</td>
+</tr>
+<tr>
+<td>Recommendation reset</td>
+<td>Settings → "Reset my recommendations" clears behavioral signals, keeps profile</td>
+</tr>
+<tr>
+<td>Transparency</td>
+<td>SET-05a "What we use to recommend you"</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Evolution:</strong> V1 rules → V2 learning-to-rank on observed outcomes (repeat attendance, second meetup) → V3 graph/collaborative. Optimize for repeated positive interaction, <strong>not</strong> session time.</p>
+<h2 id="124-api-touchpoints">12.4 API touchpoints</h2>
+<p><code>GET /recommendations/circles</code>, <code>GET /recommendations/activities</code>, <code>POST /recommendations/feedback</code>, <code>POST /recommendations/reset</code>.</p>
+<hr />
+<h1 id="part-13-communities-circles">PART 13 — COMMUNITIES &amp; CIRCLES</h1>
+<h2 id="131-entity-model-three-levels">13.1 Entity model (three levels)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Definition</th>
+<th>Size</th>
+<th>Role</th>
+<th>MVP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interest</strong></td>
+<td>Taxonomy node (e.g., Photography)</td>
+<td>n/a</td>
+<td>Tagging &amp; search</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><strong>Community</strong></td>
+<td>Local interest hub (e.g., Photography · Bengaluru)</td>
+<td>Any</td>
+<td>Lightweight landing page: description, rules, upcoming Activities, Circles, member list (limited), announcements</td>
+<td>✓ (light)</td>
+</tr>
+<tr>
+<td><strong>Circle</strong></td>
+<td>Small recurring group (4–8; hard cap 10)</td>
+<td>4–8</td>
+<td>Where relationships form; has group chat and recurring Activities</td>
+<td>✓ <strong>[CORE]</strong></td>
+</tr>
+<tr>
+<td><strong>Activity</strong></td>
+<td>Single session/event, may belong to a Circle or Community</td>
+<td>2–20</td>
+<td>Real-world/online interaction</td>
+<td>✓ <strong>[CORE]</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="132-feature-decisions">13.2 Feature decisions</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Decision</th>
+<th>Tag</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Community discovery / categories / search</td>
+<td>Curated categories; search by interest &amp; city</td>
+<td>CORE</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Community page</td>
+<td>Info hub, no feed</td>
+<td>SUPPORT</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Join / leave community</td>
+<td>One tap; leave anytime, no penalty</td>
+<td>SUPPORT</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Community posts, comments, reactions</td>
+<td>Text posts with moderation</td>
+<td>SUPPORT→FUTURE</td>
+<td><strong>V2</strong></td>
+</tr>
+<tr>
+<td>Polls</td>
+<td>Simple polls (used for choosing Activity times)</td>
+<td>SUPPORT</td>
+<td>MVP inside Circle chat</td>
+</tr>
+<tr>
+<td>Media sharing</td>
+<td>Images only in Circle chat</td>
+<td>SUPPORT</td>
+<td>V2 (MVP: text + emoji only; images after moderation pipeline ready)</td>
+</tr>
+<tr>
+<td>Announcements</td>
+<td>Host/mod-only banner</td>
+<td>SUPPORT</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Community chat (large)</td>
+<td><strong>Do not build</strong> — becomes Discord-lite</td>
+<td>BLOAT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Events tab inside community</td>
+<td>Yes, list of Activities</td>
+<td>CORE</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Create community</td>
+<td>Admin-curated in MVP; hosts create <strong>Circles/Activities</strong> under existing communities</td>
+<td>SUPPORT</td>
+<td>Community creation V2</td>
+</tr>
+<tr>
+<td>Moderator tools</td>
+<td>Basic: remove member, remove message, ban, approve requests</td>
+<td>SUPPORT</td>
+<td>MVP-lite</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Why communities are curated in MVP:</strong> open community creation produces "10,000 communities × 2 users". Hosts create Circles inside a curated community list you manage.</p>
+<h3 id="comm-01-community-page">COMM-01 — Community page</h3>
+<ul>
+<li><strong>Purpose:</strong> Orient: "What's happening in {interest} in {city}?"</li>
+<li><strong>Components:</strong> Cover image, title, city, short description, rules (collapsed), <strong>Active Circles</strong> carousel, <strong>Upcoming Activities</strong> list, member count (bucketed: "120+ members"), <strong>Join community</strong> / Joined ✓, host/moderator list, report (⋯).</li>
+<li><strong>Actions:</strong> Join community (adds to recommendation graph; unlocks community-scoped Activity invites), Join a Circle, RSVP, Report community.</li>
+<li><strong>Empty:</strong> No Circles yet → "No Circles for {interest} in {zone} yet. Start the first one." (photo-verified users) or "Join waitlist".</li>
+<li><strong>Error:</strong> Community removed/banned → "This community isn't available." (link to Discover).</li>
+<li><strong>Edge:</strong> Age-restricted communities are not needed in MVP (all users 18+); community-level "verified-only" and "women-only" flags supported.</li>
+<li><strong>Analytics:</strong> <code>community_viewed</code>, <code>community_joined</code>, <code>community_left</code>.</li>
+<li><strong>Release:</strong> MVP.</li>
+</ul>
+<h3 id="cir-01-circle-page">CIR-01 — Circle page</h3>
+<ul>
+<li><strong>Purpose:</strong> Answer "Why am I joining this?" before commitment.</li>
+<li><strong>Components:</strong> Title ("Sunday Badminton · Koramangala"), cadence ("Weekly · Sun 8 AM"), zone (venue revealed after joining), <strong>members (first name/display name, 2–3 interests, social style, badges)</strong>, spots left, <strong>Why you're here</strong> (3 reasons), host card with history ("Hosted 12 activities · Community verified"), rules &amp; vibe ("Beginner friendly · 60–90 min"), next Activity card, Join/Request button, share link.</li>
+<li><strong>Join modes:</strong> <em>Open</em> (instant) or <em>Request</em> (host approves). <strong>Default Request for Circles with women-only or dating-open tags.</strong></li>
+<li><strong>After joining:</strong> confetti-free confirmation → group prompt screen (CIR-03) → group chat (MSG-02).</li>
+<li><strong>States:</strong> Full (join waitlist), Pending approval, Member, Removed (not visible), Ended ("This Circle has wrapped up. See similar ones").</li>
+<li><strong>Edge:</strong> Fills while user is viewing → optimistic join fails gracefully → offer waitlist; user leaves and rejoins within 24h (allow); hosts leave (transfer host or archive).</li>
+<li><strong>Backend:</strong> <code>GET /circles/{id}</code>, <code>POST /circles/{id}/join</code>, <code>POST /circles/{id}/leave</code>.</li>
+<li><strong>Analytics:</strong> <code>circle_viewed</code>, <code>circle_join_requested</code>, <code>circle_joined</code>, <code>circle_left</code>.</li>
+<li><strong>Release:</strong> MVP · <strong>[CORE]</strong></li>
+</ul>
+<h3 id="cir-02-my-circles-tab">CIR-02 — My Circles (tab)</h3>
+<p>List of Circles with next meeting, unread badge, "needs attention" (e.g., RSVP pending). Empty → <strong>"You're not in a Circle yet. Pick one for this week."</strong> CTA → DISC-01.</p>
+<h3 id="cir-03-circle-welcome-first-prompt">CIR-03 — Circle welcome / first prompt</h3>
+<p>Group icebreaker created from members' shared interests (e.g., "Rank your top 3 badminton shots to learn" or "Vote Saturday vs Sunday"). Prompt is a <strong>structured activity</strong> (poll/ranking), not a free-text "say hi". Skippable.</p>
+<h3 id="cir-04-circle-members-list">CIR-04 — Circle members list</h3>
+<p>Names, badges, host/moderator tags; ⋯ per member: view profile, report, (host) remove. Members' Connect button is shown only inside profiles.</p>
+<h3 id="cir-05-circle-settings-host">CIR-05 — Circle settings (host)</h3>
+<p>Edit description/cadence/capacity, approve requests, pin announcement, moderation tools, archive Circle.</p>
+<hr />
+<h1 id="part-14-create-circle-community-flow">PART 14 — CREATE CIRCLE / COMMUNITY FLOW</h1>
+<blockquote>
+<p>MVP: creators make <strong>Circles/Activities</strong> inside curated Communities. Standalone community creation = V2 (flow spec below is kept for handoff).</p>
+</blockquote>
+<p><strong>Gate:</strong> Photo-verified; account age ≥ 7 days (proposal); attended ≥ 1 Activity <strong>or</strong> approved host application (for early supply, founder can whitelist trusted hosts).</p>
+<pre><code class="language-text">START (Create button)
+  ↓
+CIR-10 Choose type: Circle / One-off Activity
+  ↓
+CIR-11 Topic (pick Community &amp; interest)
+  ↓
+CIR-12 What will you do? (title + description, 20–300 chars; templates provided)
+  ↓
+CIR-13 When &amp; where (frequency, day/time; zone + venue category; public-place rule)
+  ↓
+CIR-14 Who is it for? (size 4–8, women-only?, verified-only?, beginner-friendly?, friends-only?)
+  ↓
+CIR-15 Rules (pre-filled template + 2 custom lines)
+  ↓
+CIR-16 Preview
+  ↓
+Auto-checks (banned terms, contact info, external links, duplicate)
+   ┌─────────────┴────────────┐
+Pass                        Flag
+ ↓                            ↓
+Publish (status: open)     Manual review (SLA 24h) → Approved / Rejected with reason
+  ↓
+CIR-17 Share &amp; invite (link; prefilled WhatsApp/Instagram share)
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Key fields</th>
+<th>Validation</th>
+<th>Errors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CIR-10</td>
+<td>Type</td>
+<td>required</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CIR-11</td>
+<td>Community, interest</td>
+<td>must exist</td>
+<td>"Can't find your topic? Suggest one."</td>
+</tr>
+<tr>
+<td>CIR-12</td>
+<td>Title, description</td>
+<td>no phone/URL/handles; no sexual/dating solicitation language for Friends-only</td>
+<td>Inline rule messages</td>
+</tr>
+<tr>
+<td>CIR-13</td>
+<td>Recurrence, day/time, zone, venue type</td>
+<td>Venue must be public place category; no private homes</td>
+<td>"For safety, Circles meet in public places."</td>
+</tr>
+<tr>
+<td>CIR-14</td>
+<td>Capacity 4–8, flags</td>
+<td>Women-only restricted to verified women/NB hosts? (<strong>policy decision needed</strong>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CIR-15</td>
+<td>Rules</td>
+<td>≥1 rule</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CIR-16</td>
+<td>Preview</td>
+<td>—</td>
+<td>Failure → "We couldn't publish. Saved as draft."</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Backend:</strong> <code>POST /circles</code>, <code>PATCH /circles/{id}</code>, <code>POST /circles/{id}/publish</code>; drafts autosaved. <strong>Analytics:</strong> <code>create_started</code>, <code>create_step_completed</code>, <code>circle_created</code>, <code>circle_rejected</code>. <strong>Hosts</strong> get a 3-card host guide (how to welcome, handle no-shows, handle a problematic member).</p>
+<p><strong>Lifecycle:</strong> Create → get first 4 members (host is nudged to invite) → first Activity → second Activity → Recurring. If &lt;3 members in 7 days: auto-suggest merge with a similar Circle or extend.</p>
+<hr />
+<h1 id="part-15-community-connection-the-key-flow">PART 15 — COMMUNITY → CONNECTION (the key flow)</h1>
+<h2 id="151-connection-ladder-visible-in-product-as-gentle-progress-private">15.1 Connection ladder (visible in-product as gentle progress, private)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>State</th>
+<th>Product behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Strangers</td>
+<td>No contact possible</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Same interest/Community</td>
+<td>Can see Circles, not people's contact</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Same Circle</td>
+<td>Group chat; profiles visible; <strong>Connect</strong> enabled</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Repeated co-attendance (≥2 Activities together)</td>
+<td>Prompt: "Want to keep in touch with {name}?" (private, one-sided)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mutual connection</td>
+<td>1:1 chat opens</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Friend</td>
+<td>Friend badge; can invite to Activities directly; optional contact exchange</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Dating (mutual + both opted-in)</td>
+<td>Date planning tools; Circle privacy preserved</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="152-escalation-mechanics-conn-01">15.2 Escalation mechanics (CONN-01)</h2>
+<ol>
+<li>After post-Activity feedback (EVT-04) or from a profile, A taps <strong>"I'd like to keep in touch"</strong> on B.</li>
+<li>A chooses <em>why</em>: <strong>Friends</strong>, <strong>Activity buddy</strong>, <strong>Dating</strong> (only shown if A's intent includes Dating <strong>and</strong> B's does; B's intent is not revealed to A — the server only offers the option when compatible).</li>
+<li>B receives a request card (not a message): "{A} from Sunday Badminton would like to connect." with <strong>Friends</strong>, <strong>Dating</strong> (only if eligible), <strong>Keep in Circle</strong>, <strong>No thanks</strong>. B never sees A's stated reason if declined.</li>
+<li>Result matrix:</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>A asks</th>
+<th>B's reply</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Friends</td>
+<td>Friends / Activity buddy</td>
+<td>Friend connection</td>
+</tr>
+<tr>
+<td>Friends</td>
+<td>Keep in Circle</td>
+<td>Stays in Circle; A gets soft "not now"</td>
+</tr>
+<tr>
+<td>Friends</td>
+<td>No</td>
+<td>A sees nothing; cooldown 30 days before re-request</td>
+</tr>
+<tr>
+<td>Dating</td>
+<td>Dating</td>
+<td>Dating connection (both explicit)</td>
+</tr>
+<tr>
+<td>Dating</td>
+<td>Friends</td>
+<td>Friend connection (A receives "B would like to connect as friends" and can accept or decline)</td>
+</tr>
+<tr>
+<td>Dating</td>
+<td>No/Keep in Circle</td>
+<td>Treated as "not now"</td>
+</tr>
+</tbody>
+</table></div>
+<ol start="5">
+<li><strong>Declines are private</strong> — A gets a neutral "no response yet" state for 7 days then "no longer available." No rejection notification.</li>
+<li>Request limits: 5 outgoing pending per user per week (raise with good standing); prevents spamming.</li>
+</ol>
+<h2 id="153-scenarios">15.3 Scenarios</h2>
+<ul>
+<li><strong>A — Friendship:</strong> Join Circle → attend 2 Activities → prompt → Friends request → accepted → 1:1 chat with suggested next Activity → friend badge.</li>
+<li><strong>B — Dating:</strong> Join Circle (intent includes Dating) → repeated interaction → Connect (Dating) → B (also Dating) accepts → private chat with date suggestions and safety card. If B is Friends-only: option converts gracefully to Friend.</li>
+<li><strong>C — Community only:</strong> Intent = Just activities → no escalation prompts; can receive Activity-buddy requests; can disable all 1:1 in settings.</li>
+<li><strong>D — Unsure:</strong> Escalation offers Friends/Activity buddy only; after the third completed Activity, ask "Anything you'd like to change about what you're looking for?"</li>
+</ul>
+<h3 id="conn-01-connection-request-compose">CONN-01 — Connection request (compose)</h3>
+<p>Components: person header, shared context summary, choice chips, optional note (max 140 chars, no links/phones/handles), <strong>Send</strong>. <strong>Guardrails:</strong> note filtered by classifier; can't send if either party is blocked/suspended; must share a Circle/Activity in MVP.</p>
+<h3 id="conn-02-requests-inbox">CONN-02 — Requests inbox</h3>
+<p>Tabs: Received / Sent. Each card: context, options. Auto-expire after 14 days. <strong>Empty:</strong> "No requests. Connections start in Circles." <strong>Release:</strong> MVP.</p>
+<hr />
+<h1 id="part-16-friendship-flow">PART 16 — FRIENDSHIP FLOW</h1>
+<pre><code class="language-text">Circle interaction → Activity together → (2nd Activity) → &quot;Keep in touch?&quot; prompt
+   ↓
+Connect (Friends) → B accepts
+   ↓
+1:1 chat opens with context header (&quot;You met at Sunday Badminton&quot;)
+   ↓
+Suggested next step: invite to another Activity / &quot;plan coffee&quot;
+   ↓
+Friend badge after: mutual connection + ≥1 additional interaction (e.g., 3 messages/side or 1 co-attended Activity)
+   ↓
+Optional: exchange contacts (each explicitly shares phone/Instagram)
+</code></pre>
+<ul>
+<li><strong>Friend requests:</strong> only with shared context (MVP). <strong>Mutual connections:</strong> show "Also connected with X" [V2].</li>
+<li><strong>Conversation prompts:</strong> Section 19.</li>
+<li><strong>Activity suggestions:</strong> in 1:1 chat, a chip row: "Invite to {next Activity}" / "Suggest a café near both zones" [V2].</li>
+<li><strong>Group interaction:</strong> "Invite {friend} to Circle" [V2].</li>
+<li><strong>Friendship status:</strong> Friend / Activity buddy; <strong>no</strong> public "friends count" [BLOAT].</li>
+<li><strong>Fade-out:</strong> If no interaction for 60 days, chat stays; connection is not shown as "lapsed" publicly. Provide "Archive" (no notification).</li>
+<li><strong>Release:</strong> MVP (basic), V2 (suggestions, contact exchange).</li>
+</ul>
+<hr />
+<h1 id="part-17-dating-flow">PART 17 — DATING FLOW</h1>
+<p><strong>Redesign:</strong> Dating is mutual escalation from a shared Circle. No swipe deck. No standalone dating marketplace in MVP.</p>
+<pre><code class="language-text">Shared Circle / Activities
+   ↓
+A → &quot;Connect&quot; (Dating)  [only if intents compatible]
+   ↓
+B decision: Dating / Friends / Keep in Circle / No
+   ↓ (both Dating)
+&quot;It's mutual&quot; screen (DATE-00)  — gentle, no confetti overload
+   ↓
+1:1 chat with structured starter (based on shared Circle context)
+   ↓ (after ≥ 3 exchanges each or 48h)
+Date suggestion chips (DATE-01): &quot;Coffee near {zone}&quot;, &quot;Join {Activity} together&quot;
+   ↓
+Safety card (DATE-02): public venue, share plan, check-in, trusted contact
+   ↓
+Date → check-in/out
+   ↓
+Post-date feedback (DATE-03): private
+   ↓
+Continue / Pause / End respectfully
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dating preferences</td>
+<td>Who you're open to; optional age range (18+); private</td>
+</tr>
+<tr>
+<td>Match expiration</td>
+<td>Dating connection chat auto-nudges at day 5 ("Say something or take a break?"), quiet-archives at 14 days of inactivity; <strong>no</strong> hard expiry that punishes slow users (offer "Extend 7 days" once)</td>
+</tr>
+<tr>
+<td>Date planning</td>
+<td>Suggest 2–3 public, partner-vetted venue categories in the shared zone; time proposals via a simple picker; <strong>no</strong> in-app payments in MVP</td>
+</tr>
+<tr>
+<td>Date safety</td>
+<td>Trusted-contact share, check-in, safe-word/"Get me out" button (sends alert), venue rule (public place)</td>
+</tr>
+<tr>
+<td>Post-date feedback</td>
+<td>Private 2 questions: "Would you like to meet again?" &amp; "Did you feel respected?" ("no" to respect triggers a follow-up and internal review)</td>
+</tr>
+<tr>
+<td>Unmatch</td>
+<td>"End connection" — silent to other party (they see the chat as closed)</td>
+</tr>
+<tr>
+<td>Block/Report</td>
+<td>Always available in chat header ⋯</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Release:</strong> Dating escalation MVP-lite (mutual opt-in + chat). Date planning/safety card <strong>Post-MVP pilot (Phase 8)</strong>. Do not open dating in a Circle without enough women/NB participation — the product should measure active supply by gender and intent before enabling dating escalation in a zone (<strong>launch gating rule</strong>).</p>
+<hr />
+<h1 id="part-18-messaging">PART 18 — MESSAGING</h1>
+<p><strong>Rules:</strong> No unsolicited inbox. Two conversation types in MVP: <strong>Circle group chat</strong> and <strong>1:1 (Connection) chat</strong>. Plans for anything else go to V2.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>MVP</th>
+<th>V2</th>
+<th>Later</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group chat (Circle) text</td>
+<td>✓</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>1:1 chat text (after mutual connection)</td>
+<td>✓</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Emoji reactions</td>
+<td>✓</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Reply/quote</td>
+<td></td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Typing indicator</td>
+<td></td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Read receipts</td>
+<td>Off by default, opt-in per user</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Image sharing</td>
+<td></td>
+<td>✓ (after moderation pipeline)</td>
+<td></td>
+</tr>
+<tr>
+<td>Voice notes</td>
+<td></td>
+<td></td>
+<td>✓ [FUTURE]</td>
+</tr>
+<tr>
+<td>Message deletion (for me/for everyone)</td>
+<td>Delete-for-everyone within 10 min</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Polls in chat</td>
+<td>✓ (Circle only)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Message requests (from strangers)</td>
+<td><strong>Not built</strong> [by design]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Large community chat</td>
+<td><strong>Not built</strong> [BLOAT]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Calls/video</td>
+<td></td>
+<td></td>
+<td>✓ [FUTURE]</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="msg-01-messages-inbox">MSG-01 — Messages inbox</h3>
+<p>Two sections: <strong>Circles</strong> (groups, with next-meeting chip) and <strong>Connections</strong> (1:1). Unread badge; muted indicator. <strong>Empty:</strong> "No conversations yet. Join a Circle to start one." CTA → DISC-01.</p>
+<h3 id="msg-02-circle-chat">MSG-02 — Circle chat</h3>
+<p>Header: Circle name, members count, ⋯ (mute, members, report, leave). Pinned: next Activity + announcement. Message composer: text, emoji, poll (host + members), "Suggest a time" chip. <strong>System messages:</strong> "{Name} joined", "Activity added". <strong>Safety strip:</strong> sticky one-time "Don't share your phone/UPI/Instagram until you know people" (dismissible).</p>
+<h3 id="msg-03-11-chat">MSG-03 — 1:1 chat</h3>
+<p>Header: name/photo, badges, context chip "Met in Sunday Badminton", ⋯ (End connection, Block, Report, Mute). Conversation starters row (Part 19). Outgoing message states: sending → sent → delivered (→ read if opted in) → failed (retry). Link previews <strong>disabled</strong> in MVP (phishing risk).</p>
+<p><strong>Moderation layer (all messages):</strong> client-side send; server-side pipeline: rules (phone numbers, payment requests, URLs, sexual keywords) → classifier (toxicity, sexual solicitation, scam patterns) → risk score → actions: allow / soft-warning to sender ("This message may make others uncomfortable. Send anyway?") / hold for review / block + strike. Recipient sees "Message hidden — may contain unsafe content. View / Report". End-to-end encryption is <strong>not</strong> used in MVP so safety review is possible; state this clearly in privacy policy [decision to review].</p>
+<p><strong>Spam detection:</strong> rate limits (msgs/min), duplicate message detection across Circles, newly joined accounts sending links, mass-invite patterns.</p>
+<p><strong>Backend:</strong> WebSocket for realtime + REST for history; message store with retention policy; push via FCM. <strong>Analytics:</strong> <code>message_sent</code>, <code>conversation_started</code>, <code>message_reported</code>, <code>message_blocked_by_filter</code>.</p>
+<hr />
+<h1 id="part-19-conversation-experience">PART 19 — CONVERSATION EXPERIENCE</h1>
+<p><strong>Where to help:</strong> Reduce blank-page anxiety with <em>contextual</em> structure, not generated fluff.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Where</th>
+<th>Source</th>
+<th>AI?</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circle first prompt (poll/ranking)</td>
+<td>CIR-03</td>
+<td>Template library + shared interests</td>
+<td>No</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Context-based starters in 1:1</td>
+<td>MSG-03</td>
+<td>"You both were at X"; "Ask about {shared interest}"</td>
+<td>Templates (rules); optional LLM personalization</td>
+<td>MVP templates / V2 LLM</td>
+</tr>
+<tr>
+<td>Shared-taste conversation cards</td>
+<td>1:1 &amp; Circle</td>
+<td>Taste items (artist/film)</td>
+<td>Rules + catalog</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>"Ask about this" tap on a profile item</td>
+<td>PROF-02</td>
+<td>Profile data</td>
+<td>No</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Activity suggestions from chat context</td>
+<td>1:1</td>
+<td>Nearby Activities</td>
+<td>Ranking</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>Group games ("rank your top 3 Nolan films")</td>
+<td>Circle</td>
+<td>Template library</td>
+<td>LLM to generate new ones; human-vetted</td>
+<td>V2</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Where AI should NOT be used:</strong> writing messages <em>for</em> users, sending messages on behalf of users, simulating people/coaches, deciding compatibility percentages, autonomous moderation decisions with high impact. <strong>Where AI may assist:</strong> drafting Circle descriptions (host tool), summarizing shared interests, generating new prompts (reviewed), classification for safety.
+<strong>Principle:</strong> Suggestions are dismissible, never auto-sent, and disabled with one setting ("Hide conversation suggestions").</p>
+<hr />
+<h1 id="part-20-events-activities">PART 20 — EVENTS (ACTIVITIES)</h1>
+<p><strong>Model:</strong> An <strong>Activity</strong> has: title, description, Circle/Community owner, host, time, duration, zone and venue (revealed after RSVP), capacity, cost (free in MVP), tags (beginner, women-only, verified-only), status (draft/open/full/cancelled/completed).</p>
+<h3 id="evt-01-activity-detail">EVT-01 — Activity detail</h3>
+<p>Components: title, date/time, zone, venue (shown after RSVP), host card, attendees (avatars/names with badges), "Who's coming", safety notes (meet in public place), what to bring, RSVP button (<strong>I'm in / Can't make it</strong>), add to calendar, share, Report. <strong>States:</strong> Open, Full (waitlist), Cancelled (reason), Past (photo/feedback prompts), RSVPed (shows check-in info). <strong>Edge:</strong> RSVP closed T–2h; capacity race conditions (server-authoritative); timezone; venue change → push to attendees.</p>
+<h3 id="evt-02-create-activity">EVT-02 — Create Activity</h3>
+<p>Similar to CIR-10..16 with reduced fields; can be spawned from Circle chat "Plan an Activity".</p>
+<h3 id="evt-03-check-in-safety">EVT-03 — Check-in / Safety</h3>
+<ul>
+<li><strong>Before (T-24h):</strong> reminder with venue, host name, "How to recognize us" note, safety tips; optional "Share with trusted contact".</li>
+<li><strong>At activity:</strong> "I've arrived" (optional check-in), "Need help" button → (a) message host, (b) call emergency number (India 112) shortcut, (c) alert trusted contact.</li>
+<li><strong>Check-out:</strong> "I'm heading home" (optional). If check-in exists and no check-out within X hours, gentle ping and, if opted in, alert trusted contact [V2].</li>
+<li><strong>No-show handling:</strong> Attendance marked by host or check-in; repeated no-shows (≥3) reduce Circle access and prompt a reminder about cancelling early.</li>
+</ul>
+<h3 id="evt-04-post-activity">EVT-04 — Post-activity</h3>
+<p>Push after end +30 min: <strong>"How was it?"</strong> (1–5 or thumbs) <strong>"Want to see these people again?"</strong> (select up to 3 attendees → private) <strong>"Did anyone make you uncomfortable?"</strong> (private → report flow). Outputs: <code>Attendance</code>, <code>PositiveInteraction</code> signals, private "keep in touch" candidates (Part 15).</p>
+<p><strong>Reminders:</strong> T-24h, T-2h, T-30m; cancel notifications immediate. <strong>Group chat:</strong> Circle chat used; ad-hoc Activities get a temporary chat (open 48h before/after).</p>
+<p><strong>How events feed the loop:</strong> Activity attendance → co-attendance graph → "keep in touch" prompts → connections; also feeds recommender (repeat interactions).
+<strong>Release:</strong> MVP (free Activities, RSVP, reminders, check-in, feedback); paid ticketing V2; venue partnerships V3.</p>
+<hr />
+<h1 id="part-21-location">PART 21 — LOCATION</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Granularity</td>
+<td>City → zone (predefined polygons) → <strong>approximate distance bucket</strong> (e.g., "Nearby", "Same zone", "Within city") — no km precision to users</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Store zone IDs + coarse grid cell; discard raw coordinates after mapping</td>
+</tr>
+<tr>
+<td>Permission (LOC-01)</td>
+<td>Explainer before OS prompt; "While using app" only; no background location in MVP</td>
+</tr>
+<tr>
+<td>Denied</td>
+<td>Manual city + zone selector (ONB-06 fallback); banner offers "Enable for better nearby results"</td>
+</tr>
+<tr>
+<td>Manual location</td>
+<td>Editable in Settings; rate-limited changes (e.g., 3/month) to reduce location spoofing</td>
+</tr>
+<tr>
+<td>Location privacy</td>
+<td>Never show others exact location; Activity venues shown only to RSVPed users; distance not shown between users</td>
+</tr>
+<tr>
+<td>Travel mode [V2]</td>
+<td>"I'm visiting {city} for {dates}" — see Activities and open Circles there; hidden from local People discovery</td>
+</tr>
+<tr>
+<td>City change</td>
+<td>Settings → new city; prompts to leave old-city Circles or keep as "away"; recommendations reset partially</td>
+</tr>
+<tr>
+<td>Spoofing</td>
+<td>Detect GPS anomalies; require photo-verification before hosting</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Release:</strong> MVP: onboarding location + manual fallback. V2: Travel mode.</p>
+<hr />
+<h1 id="part-22-notifications">PART 22 — NOTIFICATIONS</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Push</th>
+<th>In-app</th>
+<th>Email</th>
+<th>Default</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circle activity/reminders</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>On</td>
+<td>"Your photography Circle meets Saturday 7 AM"</td>
+</tr>
+<tr>
+<td>Messages (group)</td>
+<td>✓ (batched)</td>
+<td>✓</td>
+<td>—</td>
+<td>On (muteable)</td>
+<td>"3 new messages in Sunday Badminton"</td>
+</tr>
+<tr>
+<td>Connections</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>On</td>
+<td>"Someone from Sunday Badminton wants to connect" (no name in lock-screen by default)</td>
+</tr>
+<tr>
+<td>Events/Activity reminders</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>On</td>
+<td>"Tomorrow: Board games night"</td>
+</tr>
+<tr>
+<td>Dating</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>On if Dating intent</td>
+<td>"You and {name} both chose to connect"</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>✓ (critical)</td>
+<td>✓</td>
+<td>✓</td>
+<td>Always on</td>
+<td>"New login from another device"</td>
+</tr>
+<tr>
+<td>Recommendations</td>
+<td>✓</td>
+<td>✓</td>
+<td>Weekly digest optional</td>
+<td><strong>Off by default after week 2; max 2/week</strong></td>
+<td>"3 new Circles near you"</td>
+</tr>
+<tr>
+<td>System/legal</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+<td>On</td>
+<td>Policy updates, receipts</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Controls (SET-04):</strong> per-category toggles, quiet hours (default 10 PM–8 AM), per-Circle mute, lock-screen privacy ("Hide names in notifications"), digest frequency. <strong>Anti-annoyance rules:</strong> batch group messages (1 push per Circle per 15 min); never send "X liked you"/FOMO/scarcity notifications; cap marketing push at 2/week; suppress push when user is active in chat.</p>
+<h3 id="notif-01-notification-center">NOTIF-01 — Notification center</h3>
+<p>Grouped by day; types with icons; tap deep-links; "Mark all read". <strong>Empty:</strong> "You're all caught up." <strong>Release:</strong> MVP. <strong>Deep links:</strong> <code>LIGHT://circle/{id}</code>, <code>LIGHT://activity/{id}</code>, <code>LIGHT://connection/{id}</code>, <code>LIGHT://chat/{id}</code>.</p>
+<hr />
+<h1 id="part-23-search">PART 23 — SEARCH</h1>
+<h3 id="srch-01-search">SRCH-01 — Search</h3>
+<ul>
+<li><strong>MVP (light):</strong> searches <strong>Communities, Circles, Activities, Interests</strong> (not people). Search box on Discover; recent searches (local, clearable); suggestions typeahead from interest taxonomy; filters (zone, day, verified-only).</li>
+<li><strong>V2:</strong> Movies/music/topic entities (catalog lookup used to find related Circles), People search <strong>restricted</strong> to name-exact within shared Circles.</li>
+<li><strong>Do not build:</strong> global people search by name, phone number/contact match [BLOAT/safety risk: enables stalking].</li>
+<li><strong>Empty results:</strong> "No matches for '{query}'. Try a broader interest, or start a Circle for it."</li>
+<li><strong>Safety:</strong> query logs reviewed only in aggregate; block searching by phone/email; rate limits to prevent scraping.</li>
+<li><strong>Backend:</strong> PostgreSQL full-text; <code>GET /search?q=&amp;type=</code>.</li>
+<li><strong>Analytics:</strong> <code>search_performed</code>, <code>search_result_tapped</code>, <code>search_no_results</code>.</li>
+</ul>
+<hr />
+<h1 id="part-24-safety-center">PART 24 — SAFETY CENTER</h1>
+<h3 id="safe-01-safety-center-hub-from-me-tab-and-from-chat-headers">SAFE-01 — Safety Center (hub, from Me tab and from chat headers)</h3>
+<p>Sections: <strong>Get help now</strong> (112 shortcut, "Report something"), <strong>Your safety settings</strong> (visibility, trusted contact), <strong>Tips</strong> (meeting people, scams), <strong>Report history</strong> (status of your reports), <strong>Blocked users</strong>, <strong>Emergency information</strong> (India national emergency number 112, women's helpline numbers, legal-aid links — verify current numbers before launch and localize per state), <strong>Contact support</strong>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Flow</th>
+<th>Steps</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Report user (SAFE-02)</strong></td>
+<td>⋯ → Report → category (harassment, unsolicited sexual content, scam/money, impersonation/fake profile, underage, hate/abuse, safety at meetup, other) → optional evidence (auto-attached recent messages) → "Also block?" toggle → Submit</td>
+<td>Immediate protection (hide), case ID, ETA, status tracking</td>
+</tr>
+<tr>
+<td><strong>Report message</strong></td>
+<td>Long-press message → Report</td>
+<td>Attached message ID + context window</td>
+</tr>
+<tr>
+<td><strong>Report Circle/community</strong></td>
+<td>Circle ⋯ → Report</td>
+<td>Queue tagged by severity</td>
+</tr>
+<tr>
+<td><strong>Block</strong></td>
+<td>Profile/chat ⋯ → Block → confirm</td>
+<td>Mutual invisibility; existing Circles: both can stay but interactions disabled; if shared Circle, prompt host to consider</td>
+</tr>
+<tr>
+<td><strong>Unmatch / End connection</strong></td>
+<td>Chat ⋯ → End connection</td>
+<td>Silent; conversation closed</td>
+</tr>
+<tr>
+<td><strong>Restrict</strong> [V2]</td>
+<td>Soft-mute without blocking</td>
+<td>Messages hidden until user opens</td>
+</tr>
+<tr>
+<td><strong>Trusted contact</strong></td>
+<td>Set in SET/ONB-08; share activity plan; check-in alerts</td>
+<td>SMS with link</td>
+</tr>
+<tr>
+<td><strong>Scam warnings</strong></td>
+<td>In-chat detection (UPI requests, investment/crypto, "urgent help") shows interstitial</td>
+<td>Report button prominent</td>
+</tr>
+<tr>
+<td><strong>Harassment escalation</strong></td>
+<td>Severe categories (threats, sexual violence, stalking) → priority queue, human review within (target) 1–4 hours; law-enforcement referral process defined with counsel</td>
+<td>Enforcement + data preservation</td>
+</tr>
+<tr>
+<td><strong>Date safety</strong></td>
+<td>See DATE-02</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="safe-10-account-status-suspended-restricted">SAFE-10 — Account status (suspended / restricted)</h3>
+<p>Reason (general), duration, <strong>Appeal</strong> button, guidelines link. <strong>Edge:</strong> shadow-restricted accounts are not used (be transparent); repeat offenders → permanent ban, hashed device/phone signals for ban-evasion.</p>
+<p><strong>Analytics:</strong> <code>report_submitted</code> (category), <code>block_user</code>, <code>safety_center_opened</code>, <code>trusted_contact_added</code>, <code>sos_tapped</code>.</p>
+<p><strong>Release:</strong> MVP: Report/Block/End connection, Safety Center, safe defaults, Account status. V2: Restrict, trusted-contact alerts, check-out anomaly alerts.</p>
+<hr />
+<h1 id="part-25-moderation-backend-admin">PART 25 — MODERATION (backend + admin)</h1>
+<h2 id="251-pipeline">25.1 Pipeline</h2>
+<pre><code class="language-text">Signal sources: user reports · automated detectors · host reports · random audits
+   ↓
+Triage service → severity score (S0–S3) + category
+   ↓
+Queue routing
+   S3 Critical (threats, stalking, minors, sexual violence)  → priority queue, immediate protective auto-action
+   S2 High (harassment, scam, impersonation)                 → human review ≤ 4h
+   S1 Medium (spam, spam-like solicitation)                  → review ≤ 24h
+   S0 Low (minor rule violations)                            → auto-action + sampling
+   ↓
+Moderator decision + action + user notification
+   ↓
+Appeal window (SAFE-10) → second-reviewer decision
+   ↓
+Audit log (immutable)
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Method</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 Rules</td>
+<td>Regex/keyword lists (phones, UPI IDs, URLs, banned terms in English/Hindi/Hinglish/regional transliteration)</td>
+<td>Fast, cheap, high recall</td>
+</tr>
+<tr>
+<td>2 Classifiers</td>
+<td>Toxicity/sexual content/scam text classifiers; image NSFW classifier; face/age estimation</td>
+<td>Vendor or open models; tune thresholds per severity</td>
+</tr>
+<tr>
+<td>3 LLM assistance</td>
+<td>Summarize a reported chat thread for moderators; propose category</td>
+<td><strong>Never</strong> auto-ban on LLM alone</td>
+</tr>
+<tr>
+<td>4 Humans</td>
+<td>Trained moderators, language coverage, escalation path, wellbeing support for moderators</td>
+<td>Required from day one</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Actions ladder:</strong> warn → content removal → feature restriction (no requests/DMs) → temporary suspension (1/7/30 days) → permanent ban. <strong>Ban evasion:</strong> phone hash, device fingerprint, payment fingerprint (V2), face embedding match (only if photo-verified and legally reviewed) → flag for review, not auto-ban. <strong>Community moderation:</strong> hosts can remove members/messages; host actions are logged and reviewable; host abuse → host status revoked.</p>
+<h2 id="252-admin-console-adm">25.2 Admin console (ADM)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Screen</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ADM-01</td>
+<td>Moderation queue</td>
+<td>Filter by severity/category/language/age of report; claim/assign</td>
+</tr>
+<tr>
+<td>ADM-02</td>
+<td>Case view</td>
+<td>Reporter, reported, evidence (chat context window, photos), history, related reports, prior actions, actions panel, notes</td>
+</tr>
+<tr>
+<td>ADM-03</td>
+<td>User lookup</td>
+<td>Profile, verifications, sessions, reports made/received, restrictions</td>
+</tr>
+<tr>
+<td>ADM-04</td>
+<td>Circle/Community view</td>
+<td>Members, hosts, reports, flags, moderation actions</td>
+</tr>
+<tr>
+<td>ADM-05</td>
+<td>Verification review</td>
+<td>Photo verification failures</td>
+</tr>
+<tr>
+<td>ADM-06</td>
+<td>Appeals queue</td>
+<td>Second-reviewer flows</td>
+</tr>
+<tr>
+<td>ADM-07</td>
+<td>Metrics dashboard</td>
+<td>Report rate, time-to-first-action, false positives, appeals overturned</td>
+</tr>
+<tr>
+<td>ADM-08</td>
+<td>Audit log</td>
+<td>Immutable action records</td>
+</tr>
+<tr>
+<td>ADM-09</td>
+<td>Content catalog</td>
+<td>Interest taxonomy, community curation, template prompts</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>RBAC:</strong> Roles — Moderator L1, Moderator L2, Trust &amp; Safety lead, Support, Community manager, Admin. Sensitive data (phone/DOB) masked by default; unmasking is logged. <strong>Data access:</strong> every view of chat content by staff is logged with reason. <strong>SLAs (proposal):</strong> S3 ≤ 1h, S2 ≤ 4h, S1 ≤ 24h. <strong>Grievance officer</strong> contact and process must be published per Indian intermediary rules — confirm exact requirements with counsel.</p>
+<p><strong>Release:</strong> MVP-lite: ADM-01–03, 08 (simple internal tool or off-the-shelf admin); rest V2.</p>
+<hr />
+<h1 id="part-26-profile-settings">PART 26 — PROFILE SETTINGS</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Screen</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SET-01</td>
+<td>Settings home</td>
+<td>List of sections</td>
+</tr>
+<tr>
+<td>SET-02</td>
+<td>Edit profile</td>
+<td>Photos, name, one-liner, interests, taste, prompts</td>
+</tr>
+<tr>
+<td>SET-03</td>
+<td>Privacy</td>
+<td>Profile visibility, hide age, hide from People, Circle-only visibility, read receipts, conversation suggestions</td>
+</tr>
+<tr>
+<td>SET-03a</td>
+<td>Discovery preferences</td>
+<td>Zone(s), radius, group size, day/time, "verified-only", "women-only" filters</td>
+</tr>
+<tr>
+<td>SET-03b</td>
+<td>Intent &amp; dating preferences</td>
+<td>Change intent; dating eligibility; "Pause dating" toggle</td>
+</tr>
+<tr>
+<td>SET-04</td>
+<td>Notifications</td>
+<td>See Part 22</td>
+</tr>
+<tr>
+<td>SET-05</td>
+<td>Location</td>
+<td>City/zone, manual change, travel mode (V2)</td>
+</tr>
+<tr>
+<td>SET-05a</td>
+<td>What we use to recommend</td>
+<td>Transparent list of signals; <strong>Reset recommendations</strong></td>
+</tr>
+<tr>
+<td>SET-06</td>
+<td>Security &amp; sessions</td>
+<td>Devices, log out all, email recovery</td>
+</tr>
+<tr>
+<td>SET-06a</td>
+<td>Verification</td>
+<td>Status &amp; actions</td>
+</tr>
+<tr>
+<td>SET-06b</td>
+<td>Blocked users</td>
+<td>List, unblock</td>
+</tr>
+<tr>
+<td>SET-07</td>
+<td>Log out</td>
+<td>Confirm dialog</td>
+</tr>
+<tr>
+<td>SET-08</td>
+<td>Data controls</td>
+<td>Download my data, delete account, consent management</td>
+</tr>
+<tr>
+<td>SET-08a</td>
+<td>Connected accounts</td>
+<td>Google/Apple linkage (V2), no social-media linking in MVP</td>
+</tr>
+<tr>
+<td>SUB-01</td>
+<td>Subscription</td>
+<td>See Part 30</td>
+</tr>
+<tr>
+<td>SET-10</td>
+<td>Help &amp; support</td>
+<td>FAQ, contact, grievance officer, report a problem</td>
+</tr>
+<tr>
+<td>SET-11</td>
+<td>Legal</td>
+<td>Terms, Privacy, Community guidelines, licenses</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Logout (SET-07):</strong> Confirm "Log out of this device?" → revoke refresh token, unregister push token, clear local caches (chat DB cleared), keep no PII on device → AUTH-02. <strong>Edge:</strong> pending drafts warn "Unsent messages will be lost."</p>
+<hr />
+<h1 id="part-27-account-deletion">PART 27 — ACCOUNT DELETION</h1>
+<pre><code class="language-text">SET-08 Data controls
+   ↓ tap &quot;Delete account&quot;
+DEL-01 Consider alternatives: &quot;Take a break instead&quot; (Pause profile) / &quot;Just leave a Circle&quot; / &quot;Continue deleting&quot;
+   ↓ Continue
+DEL-02 Reason (optional, multi-choice + free text)
+   ↓
+DEL-03 What happens: 
+    • Profile, photos, interests removed
+    • Circles left; your messages in group chats show &quot;Deleted user&quot;
+    • Active subscription must be cancelled in the app store (deep link)
+    • You can restore within 30 days
+   ↓
+DEL-04 Re-authenticate (OTP)
+   ↓
+DEL-05 Confirm (type &quot;DELETE&quot; or hold to confirm)
+   ↓
+Account state = pending_deletion (hidden from everyone, sessions revoked)
+   ↓ (login within 30 days) → SET-09 &quot;Restore your account?&quot; → Restore / Continue deleting
+   ↓ (30 days pass)
+Hard delete job: PII, photos, embeddings, profile removed; messages sent by user anonymized (kept for other users' context) or removed depending on policy; moderation/safety records retained per legal obligations (limited data: report evidence, hashed identifiers for ban evasion, transaction records for tax law).
+   ↓
+Confirmation email/SMS &quot;Your account has been deleted.&quot;
+</code></pre>
+<p><strong>Retention &amp; legal:</strong> Define a retention schedule with counsel (DPDP erasure obligations vs. safety/legal retention, financial record retention). Ban-evasion hash of a <em>banned</em> account is retained; a normal deleted account's identifiers are erased. Provide a <strong>data export</strong> (JSON + zip of media) within a defined period before deletion. <strong>Edge cases:</strong> user is a host of active Circles → transfer host or archive first (DEL-03a); user has active report against them → deletion proceeds but case retained; user with pending payments → block until resolved; deletion while suspended → allowed but ban records persist.
+<strong>Analytics:</strong> <code>delete_account_started</code>, <code>delete_reason</code>, <code>account_deleted</code>, <code>deletion_restored</code>.
+<strong>Release:</strong> MVP (mandatory for app stores and privacy compliance).</p>
+<hr />
+<h1 id="part-28-empty-states">PART 28 — EMPTY STATES</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Context</th>
+<th>What the app says</th>
+<th>CTA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New user, Home</td>
+<td>"Let's find your first Circle."</td>
+<td>View 3 Circles</td>
+</tr>
+<tr>
+<td>No Circles in zone</td>
+<td>"No Circles for {interest} in {zone} yet."</td>
+<td>Join waitlist · Broaden area · Start one</td>
+</tr>
+<tr>
+<td>No communities</td>
+<td>"No Communities here yet."</td>
+<td>Suggest a topic</td>
+</tr>
+<tr>
+<td>No events</td>
+<td>"Nothing planned this week."</td>
+<td>Create an Activity · See next week</td>
+</tr>
+<tr>
+<td>No messages</td>
+<td>"No conversations yet. Join a Circle to start one."</td>
+<td>Discover Circles</td>
+</tr>
+<tr>
+<td>No recommendations</td>
+<td>"We're still learning what you like."</td>
+<td>Add more interests · Explore all</td>
+</tr>
+<tr>
+<td>No search results</td>
+<td>"No matches for '{q}'."</td>
+<td>Try broader · Start a Circle</td>
+</tr>
+<tr>
+<td>No notifications</td>
+<td>"You're all caught up."</td>
+<td>—</td>
+</tr>
+<tr>
+<td>No nearby users/people</td>
+<td>"Not enough people nearby yet."</td>
+<td>Invite a friend (host-gated share link) · Widen area</td>
+</tr>
+<tr>
+<td>No connection requests</td>
+<td>"No requests. Connections start in Circles."</td>
+<td>Discover Circles</td>
+</tr>
+<tr>
+<td>Banned community</td>
+<td>"This community is no longer available."</td>
+<td>Discover</td>
+</tr>
+<tr>
+<td>Deleted user</td>
+<td>"This profile isn't available." (avatar placeholder, name → "Deleted user")</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Deleted content</td>
+<td>"This message was removed." (moderation: "Removed for violating guidelines")</td>
+<td>Community guidelines</td>
+</tr>
+<tr>
+<td>Suspended Circle</td>
+<td>"This Circle is under review."</td>
+<td>Contact support</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Tone:</strong> invitation, not failure. Never show zero-counts that imply a dead product.</p>
+<hr />
+<h1 id="part-29-error-states">PART 29 — ERROR STATES</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Cause</th>
+<th>User message</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Network failure</td>
+<td>No connectivity</td>
+<td>"You're offline. Some things may not update."</td>
+<td>Cached read-only mode, auto-retry, "Retry"</td>
+</tr>
+<tr>
+<td>Server failure (5xx)</td>
+<td>Backend outage</td>
+<td>"Something went wrong on our side."</td>
+<td>Retry with backoff; status link; preserve form input</td>
+</tr>
+<tr>
+<td>Authentication failure</td>
+<td>Token expired/revoked</td>
+<td>"Please log in again."</td>
+<td>AUTH-05; drafts preserved locally</td>
+</tr>
+<tr>
+<td>OTP failure</td>
+<td>SMS delay/provider</td>
+<td>"We couldn't send the code."</td>
+<td>Resend; switch channel; contact support</td>
+</tr>
+<tr>
+<td>Upload failure</td>
+<td>Large file/poor network</td>
+<td>"Upload didn't finish."</td>
+<td>Retry; auto-compress; keep file selected</td>
+</tr>
+<tr>
+<td>Payment failure</td>
+<td>Card/UPI declined</td>
+<td>"Payment didn't go through. You haven't been charged."</td>
+<td>Retry/other method; check status; support</td>
+</tr>
+<tr>
+<td>Message failure</td>
+<td>Send error/filter</td>
+<td>"Message not sent." (filter: "This message can't be sent.")</td>
+<td>Tap to retry; edit; report false positive</td>
+</tr>
+<tr>
+<td>Circle/community creation failure</td>
+<td>Validation/server</td>
+<td>"We couldn't publish this Circle. Saved as draft."</td>
+<td>Edit &amp; retry; contact support</td>
+</tr>
+<tr>
+<td>Event creation failure</td>
+<td>Time conflict/validation</td>
+<td>"Check the date and location."</td>
+<td>Inline field errors</td>
+</tr>
+<tr>
+<td>Verification failure</td>
+<td>Poor lighting/mismatch</td>
+<td>"We couldn't verify your photo. Try in better light."</td>
+<td>Retry ×3 → manual review</td>
+</tr>
+<tr>
+<td>Location failure</td>
+<td>GPS unavailable/denied</td>
+<td>"We couldn't get your location."</td>
+<td>Manual city/zone selection</td>
+</tr>
+<tr>
+<td>Rate limit</td>
+<td>Abuse throttles</td>
+<td>"You're doing that a lot. Try again in {time}."</td>
+<td>Wait</td>
+</tr>
+<tr>
+<td>Stale data/conflict</td>
+<td>Capacity race</td>
+<td>"Sorry — this Circle just filled up."</td>
+<td>Join waitlist</td>
+</tr>
+<tr>
+<td>Content unavailable</td>
+<td>Deleted/blocked</td>
+<td>"This isn't available."</td>
+<td>Back</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Standards:</strong> every error has a plain-language message, retry path, and preserves user input. Log <code>error_shown</code> with code.</p>
+<hr />
+<h1 id="part-30-subscription-monetization">PART 30 — SUBSCRIPTION / MONETIZATION</h1>
+<p><strong>Principle:</strong> basic discovery, joining Circles, and safety features are always free. Do not monetize connection itself in MVP.</p>
+<p><strong>Sequence:</strong> MVP free → V2 paid Activities (commission) → premium discovery → host monetization → dating premium (only after density).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Contents</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>Everything in the core loop; up to N Circle joins/month (generous); all safety</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Premium ("LIGHT+") [proposal]</td>
+<td>Early access to popular Circles (24h head start), extra discovery filters, travel mode, Activity priority waitlist, personalized weekly plan</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>Paid Activities</td>
+<td>Ticketed events with host/platform split</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>Host tools (paid)</td>
+<td>Advanced analytics, recurring paid Circles</td>
+<td>V3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Screens:</strong> SUB-01 Plans (benefit-led, price in ₹, free trial optional), SUB-02 Payment (UPI, cards, wallets via Play Billing / App Store IAP as required for digital subscriptions; check current platform policy for event ticketing exemptions), SUB-03 Manage (renewal date, change plan), SUB-04 Cancel (reason, "Pause 1 month" alternative, confirmation), SUB-05 Failed payment (grace period 7 days, in-app banner), SUB-06 Restore purchases, SUB-07 Refund info (platform-driven; link to Play/Apple refund page).
+<strong>What NOT to gate:</strong> reporting/blocking, verification, group chat, ability to see who's in your Circle, ability to accept connection requests.
+<strong>Anti-patterns to avoid:</strong> paywalled "who liked you", artificial scarcity, hidden trial conversions. <strong>Analytics:</strong> <code>paywall_viewed</code>, <code>subscription_started</code>, <code>subscription_cancelled</code>, <code>payment_failed</code>.
+<strong>Note:</strong> Illustrative revenue math (e.g., 100,000 MAU × 3% × ₹249) is scenario modeling, not a forecast.</p>
+<hr />
+<h1 id="part-31-ai-features">PART 31 — AI FEATURES</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Problem → Solution</th>
+<th>Model</th>
+<th>Input → Output</th>
+<th>Cost</th>
+<th>Failure mode</th>
+<th>Human fallback</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recommendation ranking</strong></td>
+<td>Too many options → personalized top-N</td>
+<td>Rules → gradient-boosted LTR → graph</td>
+<td>User/Circle features → score + reason codes</td>
+<td>Low (CPU)</td>
+<td>Filter bubble; cold start</td>
+<td>Editorial curation/pinned Circles</td>
+<td>MVP (rules) / V2</td>
+</tr>
+<tr>
+<td><strong>Interest extraction / normalization</strong></td>
+<td>Free-text taste → catalog IDs</td>
+<td>Embedding similarity (pgvector) + LLM fallback</td>
+<td>"arijit singh" → artist ID</td>
+<td>Low</td>
+<td>Wrong entity</td>
+<td>User edits; catalog admin</td>
+<td>V2</td>
+</tr>
+<tr>
+<td><strong>Community/Circle recommendation</strong></td>
+<td>Match to Circle</td>
+<td>Same as ranking</td>
+<td>—</td>
+<td>Low</td>
+<td>Empty zones</td>
+<td>Waitlist</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Conversation prompts</strong></td>
+<td>Blank-page anxiety</td>
+<td>Templates; LLM to generate new templates offline</td>
+<td>Shared interests → 3 prompts</td>
+<td>Low if templated</td>
+<td>Cringe/awkward, inappropriate</td>
+<td>Human-reviewed template library</td>
+<td>MVP templates / V2 LLM</td>
+</tr>
+<tr>
+<td><strong>Safety text classification</strong></td>
+<td>Harassment, scams</td>
+<td>Fine-tuned multilingual classifier + rules</td>
+<td>Message → risk score/category</td>
+<td>Medium</td>
+<td>False positives/negatives, Hinglish slang</td>
+<td>Human review; appeals</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Scam detection</strong></td>
+<td>UPI/crypto/loan traps</td>
+<td>Pattern rules + classifier + behavior (new account + links)</td>
+<td>Message + account metadata → risk</td>
+<td>Low</td>
+<td>Evasion</td>
+<td>Manual review</td>
+<td>MVP-lite</td>
+</tr>
+<tr>
+<td><strong>Image moderation</strong></td>
+<td>NSFW/violence</td>
+<td>Vendor API</td>
+<td>Image → labels</td>
+<td>Per-image cost</td>
+<td>Misses, bias</td>
+<td>Human queue</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Age/face estimation</strong></td>
+<td>Underage/fake</td>
+<td>Vendor liveness + age estimate</td>
+<td>Selfie → age band, liveness</td>
+<td>Per-check</td>
+<td>Errors across skin tones/lighting</td>
+<td>Human review; alternate method</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Moderator assist</strong></td>
+<td>Reduce review time</td>
+<td>LLM summarization</td>
+<td>Reported thread → summary + suggested category</td>
+<td>Medium</td>
+<td>Hallucinations</td>
+<td>Always shown with raw evidence</td>
+<td>V2</td>
+</tr>
+<tr>
+<td><strong>Profile/host writing assist</strong></td>
+<td>Blank-page for descriptions</td>
+<td>LLM draft</td>
+<td>Bullet points → draft description</td>
+<td>Low</td>
+<td>Generic</td>
+<td>Editable</td>
+<td>V2</td>
+</tr>
+<tr>
+<td><strong>Event recommendation</strong></td>
+<td>Match activity</td>
+<td>Ranking</td>
+<td>—</td>
+<td>Low</td>
+<td>—</td>
+<td>Editorial</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><strong>Relationship-outcome prediction</strong></td>
+<td>Learn what works</td>
+<td>LTR on repeat interaction labels</td>
+<td>Pair/context features → P(repeat)</td>
+<td>Medium</td>
+<td>Bias, privacy</td>
+<td>Human policy limits; audit</td>
+<td>V3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Governance:</strong> no fully automated permanent bans; bias evaluation across languages/genders/regions; log model versions per decision; provide explanations ("why this Circle"); allow opt-out of behavioral personalization. <strong>Do not use AI for:</strong> fabricated profiles/bots, fake activity, emotional manipulation, engagement-maximizing loops.</p>
+<hr />
+<h1 id="part-32-backend-data-model-conceptual">PART 32 — BACKEND DATA MODEL (conceptual)</h1>
+<p><strong>Storage separation:</strong> keep four logical stores — (1) <em>public profile</em>, (2) <em>recommendation/behavior</em>, (3) <em>safety/moderation</em>, (4) <em>private messages</em> — with separate access controls, so a single breach or admin query doesn't expose everything.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Purpose</th>
+<th>Important fields</th>
+<th>Relationships</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>Account root</td>
+<td>id, phone_hash/enc, email_enc, dob, status (active/suspended/pending_deletion/banned), created_at, last_active, locale</td>
+<td>1:1 Profile; 1:N others</td>
+</tr>
+<tr>
+<td><strong>Profile</strong></td>
+<td>Public identity</td>
+<td>display_name, photo_ids, one_liner, gender, pronouns, zone_id, languages, verification_level, hide_age</td>
+<td>belongs to User</td>
+</tr>
+<tr>
+<td><strong>Interest</strong></td>
+<td>Taxonomy node</td>
+<td>id, name, parent_id, category, aliases</td>
+<td>M:N via UserInterest</td>
+</tr>
+<tr>
+<td><strong>UserInterest</strong></td>
+<td>User↔interest</td>
+<td>user_id, interest_id, rank, level</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TasteItem</strong></td>
+<td>Artist/film/etc.</td>
+<td>user_id, catalog_id/free_text, category</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Preference</strong></td>
+<td>Private settings</td>
+<td>intent[], dating_prefs (encrypted), age_range, group_size, energy, format, availability_json, notif_prefs</td>
+<td>1:1 User</td>
+</tr>
+<tr>
+<td><strong>City / Zone</strong></td>
+<td>Geography</td>
+<td>id, name, polygon, city_id</td>
+<td>Users, Circles, Activities</td>
+</tr>
+<tr>
+<td><strong>Community</strong></td>
+<td>Local interest hub</td>
+<td>id, interest_id, city_id, title, description, rules, flags (verified_only, women_only), status</td>
+<td>1:N Circles, Activities</td>
+</tr>
+<tr>
+<td><strong>CommunityMember</strong></td>
+<td>Membership</td>
+<td>community_id, user_id, role (member/mod), joined_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Circle</strong></td>
+<td>Small recurring group</td>
+<td>id, community_id, host_id, title, description, cadence, zone_id, capacity, join_mode, flags, status, created_at</td>
+<td>1:N Activities, Members</td>
+</tr>
+<tr>
+<td><strong>CircleMember</strong></td>
+<td>Membership</td>
+<td>circle_id, user_id, role, status (requested/active/removed/left), joined_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Activity</strong></td>
+<td>Session/event</td>
+<td>id, circle_id?, community_id, host_id, title, start/end, zone_id, venue_ref, capacity, cost, status, flags</td>
+<td>1:N Participants</td>
+</tr>
+<tr>
+<td><strong>ActivityParticipant</strong></td>
+<td>RSVP/attendance</td>
+<td>activity_id, user_id, rsvp_status, checked_in_at, checked_out_at, feedback_score</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Post / Comment / Reaction</strong> (V2)</td>
+<td>Community content</td>
+<td>id, author_id, community_id, body, media_ids, status</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Connection</strong></td>
+<td>Mutual relationship</td>
+<td>id, user_a, user_b, type (friend/dating/activity_buddy), status (pending/active/ended), context_circle_id, created_at</td>
+<td>Conversation 1:1</td>
+</tr>
+<tr>
+<td><strong>ConnectionRequest</strong></td>
+<td>Escalation request</td>
+<td>id, from, to, requested_type, context, status, expires_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Conversation</strong></td>
+<td>Chat container</td>
+<td>id, type (circle/direct/activity), ref_id, created_at, retention_policy</td>
+<td>1:N Messages</td>
+</tr>
+<tr>
+<td><strong>Message</strong></td>
+<td>Chat message</td>
+<td>id, conversation_id, sender_id, body, media_id?, moderation_state, created_at, deleted_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Match</strong> (if Dating)</td>
+<td>Represented as Connection type=dating; no separate entity in MVP</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Report</strong></td>
+<td>User report</td>
+<td>id, reporter_id, target_type/id, category, evidence_refs, status, severity</td>
+<td>ModerationAction</td>
+</tr>
+<tr>
+<td><strong>Block</strong></td>
+<td>Block relation</td>
+<td>blocker_id, blocked_id, created_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Verification</strong></td>
+<td>Verification record</td>
+<td>user_id, type, status, vendor_ref, verified_at, expires_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Notification</strong></td>
+<td>In-app notification</td>
+<td>id, user_id, type, payload, read_at, created_at</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NotificationPreference</strong></td>
+<td>Controls</td>
+<td>user_id, category, channel, on/off, quiet_hours</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Recommendation</strong></td>
+<td>Served rec + reason</td>
+<td>id, user_id, object_type/id, score, reason_codes, model_version, shown_at, action, feedback</td>
+<td>Analytics/training</td>
+</tr>
+<tr>
+<td><strong>InteractionEvent</strong></td>
+<td>Behavior log</td>
+<td>user_id, event, object, props, ts</td>
+<td>Analytics</td>
+</tr>
+<tr>
+<td><strong>ModerationAction</strong></td>
+<td>Enforcement</td>
+<td>id, target, action, reason, moderator_id, created_at, expires_at</td>
+<td>Report</td>
+</tr>
+<tr>
+<td><strong>Appeal</strong></td>
+<td>Appeal</td>
+<td>id, action_id, user_id, status, reviewer</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Subscription / Payment</strong> (V2)</td>
+<td>Billing</td>
+<td>plan, status, platform, renewal_date, external_id; payment ref, amount, currency</td>
+<td>User</td>
+</tr>
+<tr>
+<td><strong>Consent</strong></td>
+<td>Consent artifacts</td>
+<td>user_id, purpose, policy_version, granted_at, revoked_at</td>
+<td>User</td>
+</tr>
+<tr>
+<td><strong>AuditLog</strong></td>
+<td>Staff actions</td>
+<td>actor, action, subject, reason, ts</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="relationship-diagram">Relationship diagram</h3>
+<pre><code class="language-text">User 1─1 Profile
+User 1─1 Preference
+User M─N Interest (UserInterest)
+User M─N Community (CommunityMember)
+Community 1─N Circle 1─N Activity
+Circle M─N User (CircleMember)
+Activity M─N User (ActivityParticipant)
+User M─N User (Connection) ── 1─1 Conversation
+Circle 1─1 Conversation (group)   Activity 0..1─1 Conversation
+Conversation 1─N Message
+User 1─N Report ── 1─N ModerationAction ── 0..1 Appeal
+User 1─N Block
+User 1─N Verification
+User 1─N Notification
+User 1─N Recommendation ── (Circle | Activity | User)
+User 1─N Subscription ── 1─N Payment
+</code></pre>
+<p><strong>Key constraints:</strong> one active Connection per user pair; Circle capacity enforced transactionally; soft-delete + retention jobs; PII columns encrypted; row-level access checks for "shared Circle" rule in Connect eligibility.</p>
+<hr />
+<h1 id="part-33-api-architecture">PART 33 — API ARCHITECTURE</h1>
+<p><strong>Conventions:</strong> REST/JSON <code>v1</code>, JWT bearer (15-min access, rotating refresh), idempotency keys on POSTs that create resources, cursor pagination, rate limiting per user+IP, standard error schema <code>{code, message, field?}</code>, WebSocket for chat.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+<th>Input</th>
+<th>Output</th>
+<th>Auth</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /auth/otp/request</code></td>
+<td>Send OTP</td>
+<td>phone</td>
+<td>request_id, resend_after</td>
+<td>None</td>
+<td>Rate-limited</td>
+</tr>
+<tr>
+<td><code>POST /auth/otp/verify</code></td>
+<td>Verify OTP</td>
+<td>request_id, code</td>
+<td>tokens, account_state</td>
+<td>None</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /auth/social</code></td>
+<td>Google/Apple</td>
+<td>id_token</td>
+<td>tokens or "phone_required"</td>
+<td>None</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /auth/refresh</code></td>
+<td>Refresh</td>
+<td>refresh_token</td>
+<td>tokens</td>
+<td>Refresh</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /auth/logout</code></td>
+<td>Revoke</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /auth/logout-all</code></td>
+<td>Revoke all</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /auth/sessions</code></td>
+<td>List devices</td>
+<td>—</td>
+<td>sessions</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /auth/recovery</code></td>
+<td>Start recovery</td>
+<td>email or support flow</td>
+<td>status</td>
+<td>None</td>
+<td>Throttled</td>
+</tr>
+<tr>
+<td><code>GET /config</code></td>
+<td>Remote config/flags</td>
+<td>app_version</td>
+<td>config</td>
+<td>None</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>PUT /onboarding/{step}</code></td>
+<td>Save step</td>
+<td>step payload</td>
+<td>next_step</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /me</code></td>
+<td>My account</td>
+<td>—</td>
+<td>user+profile+prefs</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>PUT /me/profile</code></td>
+<td>Edit profile</td>
+<td>fields</td>
+<td>profile</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>PUT /me/preferences</code></td>
+<td>Preferences</td>
+<td>prefs</td>
+<td>prefs</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>PUT /me/privacy</code></td>
+<td>Privacy</td>
+<td>settings</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /media/upload-url</code></td>
+<td>Pre-signed upload</td>
+<td>type,size</td>
+<td>url,media_id</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /verification/photo</code></td>
+<td>Start liveness</td>
+<td>session</td>
+<td>vendor token</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /verification/status</code></td>
+<td>Status</td>
+<td>—</td>
+<td>list</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /home</code></td>
+<td>Home aggregate</td>
+<td>zone</td>
+<td>sections</td>
+<td>Bearer</td>
+<td>Onboarded</td>
+</tr>
+<tr>
+<td><code>GET /discover/circles</code></td>
+<td>List</td>
+<td>filters,cursor</td>
+<td>circles + reasons</td>
+<td>Bearer</td>
+<td>Onboarded</td>
+</tr>
+<tr>
+<td><code>GET /discover/activities</code></td>
+<td>List</td>
+<td>filters</td>
+<td>activities</td>
+<td>Bearer</td>
+<td>Onboarded</td>
+</tr>
+<tr>
+<td><code>GET /discover/communities</code></td>
+<td>List</td>
+<td>city, interest</td>
+<td>communities</td>
+<td>Bearer</td>
+<td>Onboarded</td>
+</tr>
+<tr>
+<td><code>GET /discover/people</code> (V2)</td>
+<td>Curated people</td>
+<td>—</td>
+<td>≤5</td>
+<td>Bearer</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td><code>GET /communities/{id}</code></td>
+<td>Detail</td>
+<td>—</td>
+<td>community</td>
+<td>Bearer</td>
+<td>Visible</td>
+</tr>
+<tr>
+<td><code>POST /communities/{id}/join</code> / <code>DELETE</code></td>
+<td>Join/leave</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Eligible</td>
+</tr>
+<tr>
+<td><code>GET /circles/{id}</code></td>
+<td>Detail</td>
+<td>—</td>
+<td>circle+members</td>
+<td>Bearer</td>
+<td>Visible</td>
+</tr>
+<tr>
+<td><code>POST /circles</code></td>
+<td>Create</td>
+<td>fields</td>
+<td>circle(draft)</td>
+<td>Bearer</td>
+<td>Verified host</td>
+</tr>
+<tr>
+<td><code>POST /circles/{id}/publish</code></td>
+<td>Publish</td>
+<td>—</td>
+<td>status</td>
+<td>Bearer</td>
+<td>Host</td>
+</tr>
+<tr>
+<td><code>POST /circles/{id}/join</code></td>
+<td>Join/request</td>
+<td>—</td>
+<td>membership</td>
+<td>Bearer</td>
+<td>Eligible</td>
+</tr>
+<tr>
+<td><code>POST /circles/{id}/leave</code></td>
+<td>Leave</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Member</td>
+</tr>
+<tr>
+<td><code>POST /circles/{id}/members/{uid}/approve|remove</code></td>
+<td>Manage</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Host/mod</td>
+</tr>
+<tr>
+<td><code>GET /activities/{id}</code></td>
+<td>Detail</td>
+<td>—</td>
+<td>activity</td>
+<td>Bearer</td>
+<td>Visible</td>
+</tr>
+<tr>
+<td><code>POST /activities</code></td>
+<td>Create</td>
+<td>fields</td>
+<td>activity</td>
+<td>Bearer</td>
+<td>Verified host</td>
+</tr>
+<tr>
+<td><code>POST /activities/{id}/rsvp</code></td>
+<td>RSVP</td>
+<td>status</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Eligible</td>
+</tr>
+<tr>
+<td><code>POST /activities/{id}/checkin</code></td>
+<td>Check-in</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>RSVPed</td>
+</tr>
+<tr>
+<td><code>POST /activities/{id}/feedback</code></td>
+<td>Feedback</td>
+<td>score, keep_in_touch[]</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Attended</td>
+</tr>
+<tr>
+<td><code>POST /connections/requests</code></td>
+<td>Request</td>
+<td>to_user, type, note</td>
+<td>request</td>
+<td>Bearer</td>
+<td>Shared context + verified</td>
+</tr>
+<tr>
+<td><code>GET /connections/requests</code></td>
+<td>List</td>
+<td>box</td>
+<td>requests</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /connections/requests/{id}/respond</code></td>
+<td>Respond</td>
+<td>choice</td>
+<td>connection or none</td>
+<td>Bearer</td>
+<td>Recipient</td>
+</tr>
+<tr>
+<td><code>GET /connections</code></td>
+<td>List</td>
+<td>—</td>
+<td>connections</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /connections/{id}/end</code></td>
+<td>End</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Party</td>
+</tr>
+<tr>
+<td><code>GET /conversations</code></td>
+<td>Inbox</td>
+<td>cursor</td>
+<td>conversations</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /conversations/{id}/messages</code></td>
+<td>History</td>
+<td>cursor</td>
+<td>messages</td>
+<td>Bearer</td>
+<td>Participant</td>
+</tr>
+<tr>
+<td><code>POST /conversations/{id}/messages</code></td>
+<td>Send</td>
+<td>body</td>
+<td>message</td>
+<td>Bearer</td>
+<td>Participant</td>
+</tr>
+<tr>
+<td><code>WS /realtime</code></td>
+<td>Live events</td>
+<td>token</td>
+<td>events</td>
+<td>Bearer</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /reports</code></td>
+<td>Report</td>
+<td>target, category, evidence</td>
+<td>case_id</td>
+<td>Bearer</td>
+<td>Any</td>
+</tr>
+<tr>
+<td><code>POST /blocks</code> / <code>DELETE /blocks/{uid}</code></td>
+<td>Block</td>
+<td>uid</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /notifications</code> / <code>PUT /notifications/read</code></td>
+<td>Notifs</td>
+<td>—</td>
+<td>list</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>PUT /notifications/preferences</code></td>
+<td>Controls</td>
+<td>prefs</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /devices/push-token</code></td>
+<td>FCM</td>
+<td>token</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /search</code></td>
+<td>Search</td>
+<td>q, type</td>
+<td>results</td>
+<td>Bearer</td>
+<td>Onboarded</td>
+</tr>
+<tr>
+<td><code>POST /recommendations/feedback</code></td>
+<td>Feedback</td>
+<td>object, reason</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /recommendations/reset</code></td>
+<td>Reset</td>
+<td>—</td>
+<td>ok</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>GET /subscriptions/plans</code>, <code>POST /subscriptions/verify-receipt</code>, <code>POST /subscriptions/restore</code> (V2)</td>
+<td>Billing</td>
+<td>receipt</td>
+<td>entitlement</td>
+<td>Bearer</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><code>POST /me/export</code>, <code>POST /me/delete</code>, <code>POST /me/delete/restore</code></td>
+<td>Data rights</td>
+<td>reauth</td>
+<td>job status</td>
+<td>Bearer + OTP</td>
+<td>Own</td>
+</tr>
+<tr>
+<td><strong>Admin</strong> <code>GET /admin/reports</code>, <code>POST /admin/actions</code>, <code>GET /admin/users/{id}</code>, <code>GET /admin/audit</code></td>
+<td>Moderation</td>
+<td>—</td>
+<td>—</td>
+<td>Staff SSO + RBAC</td>
+<td>Role-based</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-34-application-navigation">PART 34 — APPLICATION NAVIGATION</h1>
+<pre><code class="language-text">                         APP
+                          │
+   ┌────────┬─────────────┼──────────────┬────────┐
+  Home   Discover      Circles        Messages    Me
+   │        │              │              │        │
+ Hero    Circles/       My Circles     Circles   Profile
+ Recs    Activities/    Create         Connections Safety Center
+ Waiting Communities    Circle page                Settings
+   │        │              │                        Verification
+ Bell ────► Notifications (sheet)                    Subscription
+   │
+ Activity detail (from anywhere)
+ Connection requests (from Home &quot;Waiting for you&quot; / Messages)
+</code></pre>
+<ul>
+<li><strong>Bottom nav (5):</strong> Home · Discover · Circles · Messages · Me. Badges only for actionable items (unread messages, pending requests).</li>
+<li><strong>Top nav:</strong> Home has zone chip + bell; Discover has search icon; detail screens have back + share + ⋯.</li>
+<li><strong>Tabs:</strong> Discover segmented control; Messages segmented control (Circles/Connections).</li>
+<li><strong>Back navigation:</strong> standard stack; on tab root, back exits; deep-linked entry has "Home" fallback.</li>
+<li><strong>Deep links:</strong> invites (<code>/invite/{code}</code>, <code>/circle/{id}</code>), Activity, chat, connection request; unauthenticated deep link → welcome → onboarding → resume target.</li>
+<li><strong>Notifications routing:</strong> push → screen with context; in-app center groups.</li>
+<li><strong>Modals/bottom sheets:</strong> RSVP confirm, report, block confirm, filters, intent change, safety tips, permission explainers. <strong>Full-screen flows:</strong> onboarding, create Circle, verification, delete account.</li>
+<li><strong>Android:</strong> back button closes sheets first; <strong>Accessibility:</strong> focus order and screen-reader labels defined per screen.</li>
+</ul>
+<hr />
+<h1 id="part-35-complete-screen-inventory">PART 35 — COMPLETE SCREEN INVENTORY</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Screen</th>
+<th>Module</th>
+<th>Purpose</th>
+<th>User Action</th>
+<th>Next Screen</th>
+<th>Backend</th>
+<th>Rel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SYS-01</td>
+<td>Force update</td>
+<td>System</td>
+<td>Enforce minimum version</td>
+<td>Update</td>
+<td>Store</td>
+<td>config</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SYS-02</td>
+<td>Maintenance</td>
+<td>System</td>
+<td>Outage notice</td>
+<td>Retry</td>
+<td>Splash</td>
+<td>config</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-01</td>
+<td>Splash</td>
+<td>Auth</td>
+<td>Session check</td>
+<td>—</td>
+<td>AUTH-02/HOME</td>
+<td>refresh, config</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-02</td>
+<td>Welcome</td>
+<td>Auth</td>
+<td>Value prop</td>
+<td>Get started/Login</td>
+<td>AUTH-03/05</td>
+<td>—</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-03</td>
+<td>Phone entry</td>
+<td>Auth</td>
+<td>Start OTP</td>
+<td>Send OTP</td>
+<td>AUTH-04</td>
+<td>otp/request</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-04</td>
+<td>OTP verify</td>
+<td>Auth</td>
+<td>Verify</td>
+<td>Enter code</td>
+<td>ONB-01/HOME</td>
+<td>otp/verify</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-05</td>
+<td>Login</td>
+<td>Auth</td>
+<td>Returning login</td>
+<td>Send OTP</td>
+<td>AUTH-04</td>
+<td>otp/request</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-06</td>
+<td>Account recovery</td>
+<td>Auth</td>
+<td>Regain access</td>
+<td>Enter email</td>
+<td>Verify</td>
+<td>recovery</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>AUTH-07</td>
+<td>Suspicious login challenge</td>
+<td>Auth</td>
+<td>Step-up</td>
+<td>Verify</td>
+<td>HOME</td>
+<td>auth</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>ONB-01</td>
+<td>Age &amp; basics</td>
+<td>Onboarding</td>
+<td>Age gate</td>
+<td>Enter DOB</td>
+<td>ONB-02</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-01b</td>
+<td>Under-age block</td>
+<td>Onboarding</td>
+<td>Block</td>
+<td>—</td>
+<td>Exit</td>
+<td>—</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-02</td>
+<td>Intent</td>
+<td>Onboarding</td>
+<td>Set intent</td>
+<td>Select</td>
+<td>ONB-03</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-02b</td>
+<td>Dating openness sheet</td>
+<td>Onboarding</td>
+<td>Eligibility</td>
+<td>Select</td>
+<td>ONB-03</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-03</td>
+<td>Interests</td>
+<td>Onboarding</td>
+<td>Interest graph</td>
+<td>Select</td>
+<td>ONB-04</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-04</td>
+<td>Taste</td>
+<td>Onboarding</td>
+<td>Taste items</td>
+<td>Add/skip</td>
+<td>ONB-05</td>
+<td>catalog</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-05</td>
+<td>Social style</td>
+<td>Onboarding</td>
+<td>Group fit</td>
+<td>Tap</td>
+<td>ONB-06</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-06</td>
+<td>Location</td>
+<td>Onboarding</td>
+<td>City/zone</td>
+<td>Allow/manual</td>
+<td>ONB-07</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-06b</td>
+<td>City unsupported/waitlist</td>
+<td>Onboarding</td>
+<td>Waitlist</td>
+<td>Join</td>
+<td>Exit/Home</td>
+<td>waitlist</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-07</td>
+<td>Availability</td>
+<td>Onboarding</td>
+<td>Slots</td>
+<td>Toggle</td>
+<td>ONB-08</td>
+<td>onboarding</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-08</td>
+<td>Safety &amp; privacy</td>
+<td>Onboarding</td>
+<td>Defaults</td>
+<td>Confirm</td>
+<td>ONB-09</td>
+<td>privacy, consent</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-09</td>
+<td>Profile</td>
+<td>Onboarding</td>
+<td>Identity</td>
+<td>Save</td>
+<td>ONB-10</td>
+<td>profile, media</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-10</td>
+<td>Verification nudge</td>
+<td>Onboarding</td>
+<td>Trust</td>
+<td>Verify/skip</td>
+<td>ONB-11</td>
+<td>verification</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>ONB-11</td>
+<td>Building recs</td>
+<td>Onboarding</td>
+<td>Transition</td>
+<td>—</td>
+<td>HOME</td>
+<td>recs</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>HOME-01</td>
+<td>Home</td>
+<td>Home</td>
+<td>Actionable plans</td>
+<td>Join</td>
+<td>CIR-01/EVT-01</td>
+<td>home</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>HOME-02</td>
+<td>Waiting for you (list)</td>
+<td>Home</td>
+<td>Pending actions</td>
+<td>Respond</td>
+<td>CONN-02</td>
+<td>home</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>DISC-01</td>
+<td>Discover hub</td>
+<td>Discover</td>
+<td>Browse</td>
+<td>Filter/open</td>
+<td>CIR-01/EVT-01/COMM-01</td>
+<td>discover</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>DISC-02</td>
+<td>Filters sheet</td>
+<td>Discover</td>
+<td>Refine</td>
+<td>Apply</td>
+<td>DISC-01</td>
+<td>discover</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>DISC-03</td>
+<td>Person card (in Circle)</td>
+<td>Discover</td>
+<td>Preview</td>
+<td>Connect</td>
+<td>PROF-02/CONN-01</td>
+<td>profiles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>DISC-04</td>
+<td>People tab</td>
+<td>Discover</td>
+<td>Curated people</td>
+<td>Connect</td>
+<td>CONN-01</td>
+<td>discover/people</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>DISC-05</td>
+<td>Interest landing</td>
+<td>Discover</td>
+<td>Interest hub</td>
+<td>Join</td>
+<td>CIR-01</td>
+<td>discover</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>COMM-01</td>
+<td>Community page</td>
+<td>Communities</td>
+<td>Hub</td>
+<td>Join</td>
+<td>CIR-01</td>
+<td>communities</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>COMM-02</td>
+<td>Community members</td>
+<td>Communities</td>
+<td>Members</td>
+<td>View</td>
+<td>PROF-02</td>
+<td>communities</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>COMM-03</td>
+<td>Community posts</td>
+<td>Communities</td>
+<td>Discussion</td>
+<td>Post</td>
+<td>—</td>
+<td>posts</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>COMM-04</td>
+<td>Create community</td>
+<td>Communities</td>
+<td>Start hub</td>
+<td>Submit</td>
+<td>COMM-01</td>
+<td>communities</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>COMM-05</td>
+<td>Community moderation</td>
+<td>Communities</td>
+<td>Mod tools</td>
+<td>Act</td>
+<td>—</td>
+<td>mod</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>CIR-01</td>
+<td>Circle page</td>
+<td>Circles</td>
+<td>Decide</td>
+<td>Join</td>
+<td>CIR-03</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CIR-02</td>
+<td>My Circles</td>
+<td>Circles</td>
+<td>List</td>
+<td>Open</td>
+<td>CIR-01/MSG-02</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CIR-03</td>
+<td>Circle welcome prompt</td>
+<td>Circles</td>
+<td>Icebreaker</td>
+<td>Respond</td>
+<td>MSG-02</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CIR-04</td>
+<td>Members list</td>
+<td>Circles</td>
+<td>Roster</td>
+<td>View</td>
+<td>PROF-02</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CIR-05</td>
+<td>Circle settings (host)</td>
+<td>Circles</td>
+<td>Manage</td>
+<td>Edit</td>
+<td>CIR-01</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CIR-10–CIR-17</td>
+<td>Create Circle flow (8 screens)</td>
+<td>Circles</td>
+<td>Create</td>
+<td>Complete</td>
+<td>CIR-01</td>
+<td>circles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>PROF-01</td>
+<td>My profile</td>
+<td>Profile</td>
+<td>View/edit</td>
+<td>Edit</td>
+<td>SET-02</td>
+<td>me</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>PROF-02</td>
+<td>Other profile</td>
+<td>Profile</td>
+<td>View</td>
+<td>Connect/Report</td>
+<td>CONN-01</td>
+<td>profiles</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>PROF-03</td>
+<td>Verify photo</td>
+<td>Profile</td>
+<td>Liveness</td>
+<td>Capture</td>
+<td>PROF-01</td>
+<td>verification</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CONN-01</td>
+<td>Connection compose</td>
+<td>Connections</td>
+<td>Escalate</td>
+<td>Send</td>
+<td>CONN-02</td>
+<td>connections</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CONN-02</td>
+<td>Requests inbox</td>
+<td>Connections</td>
+<td>Respond</td>
+<td>Accept</td>
+<td>MSG-03</td>
+<td>connections</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>CONN-03</td>
+<td>Connections list</td>
+<td>Connections</td>
+<td>Friends/dating</td>
+<td>Open</td>
+<td>MSG-03</td>
+<td>connections</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>MSG-01</td>
+<td>Inbox</td>
+<td>Messages</td>
+<td>Conversations</td>
+<td>Open</td>
+<td>MSG-02/03</td>
+<td>conversations</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>MSG-02</td>
+<td>Circle chat</td>
+<td>Messages</td>
+<td>Coordinate</td>
+<td>Send</td>
+<td>EVT-01</td>
+<td>messages</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>MSG-03</td>
+<td>1:1 chat</td>
+<td>Messages</td>
+<td>Relationship</td>
+<td>Send</td>
+<td>DATE-01</td>
+<td>messages</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>MSG-04</td>
+<td>Chat info/media</td>
+<td>Messages</td>
+<td>Details</td>
+<td>—</td>
+<td>—</td>
+<td>conversations</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>EVT-01</td>
+<td>Activity detail</td>
+<td>Events</td>
+<td>Decide</td>
+<td>RSVP</td>
+<td>EVT-03</td>
+<td>activities</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>EVT-02</td>
+<td>Create Activity</td>
+<td>Events</td>
+<td>Create</td>
+<td>Publish</td>
+<td>EVT-01</td>
+<td>activities</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>EVT-03</td>
+<td>Check-in/help</td>
+<td>Events</td>
+<td>Safety</td>
+<td>Check in</td>
+<td>EVT-04</td>
+<td>activities</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>EVT-04</td>
+<td>Post-activity</td>
+<td>Events</td>
+<td>Feedback</td>
+<td>Submit</td>
+<td>CONN-01/Home</td>
+<td>feedback</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>EVT-05</td>
+<td>Calendar view</td>
+<td>Events</td>
+<td>Schedule</td>
+<td>Browse</td>
+<td>EVT-01</td>
+<td>activities</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>DATE-00</td>
+<td>Mutual moment</td>
+<td>Dating</td>
+<td>Notify mutual</td>
+<td>Chat</td>
+<td>MSG-03</td>
+<td>connections</td>
+<td>MVP-lite</td>
+</tr>
+<tr>
+<td>DATE-01</td>
+<td>Date planning</td>
+<td>Dating</td>
+<td>Plan</td>
+<td>Propose</td>
+<td>DATE-02</td>
+<td>dating</td>
+<td>Post-MVP</td>
+</tr>
+<tr>
+<td>DATE-02</td>
+<td>Date safety card</td>
+<td>Dating</td>
+<td>Safety</td>
+<td>Share/check-in</td>
+<td>MSG-03</td>
+<td>safety</td>
+<td>Post-MVP</td>
+</tr>
+<tr>
+<td>DATE-03</td>
+<td>Post-date feedback</td>
+<td>Dating</td>
+<td>Feedback</td>
+<td>Submit</td>
+<td>Home</td>
+<td>dating</td>
+<td>Post-MVP</td>
+</tr>
+<tr>
+<td>SRCH-01</td>
+<td>Search</td>
+<td>Search</td>
+<td>Find</td>
+<td>Query</td>
+<td>Results</td>
+<td>search</td>
+<td>MVP-light</td>
+</tr>
+<tr>
+<td>SRCH-02</td>
+<td>Results</td>
+<td>Search</td>
+<td>Results</td>
+<td>Open</td>
+<td>Detail</td>
+<td>search</td>
+<td>MVP-light</td>
+</tr>
+<tr>
+<td>NOTIF-01</td>
+<td>Notification center</td>
+<td>Notifications</td>
+<td>Triage</td>
+<td>Tap</td>
+<td>Deep link</td>
+<td>notifications</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-01</td>
+<td>Safety Center</td>
+<td>Safety</td>
+<td>Hub</td>
+<td>Choose</td>
+<td>SAFE-02…</td>
+<td>safety</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-02</td>
+<td>Report flow</td>
+<td>Safety</td>
+<td>Report</td>
+<td>Submit</td>
+<td>SAFE-03</td>
+<td>reports</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-03</td>
+<td>Report confirmation/status</td>
+<td>Safety</td>
+<td>Track</td>
+<td>View</td>
+<td>—</td>
+<td>reports</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-04</td>
+<td>Block confirm</td>
+<td>Safety</td>
+<td>Block</td>
+<td>Confirm</td>
+<td>Back</td>
+<td>blocks</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-05</td>
+<td>Trusted contact setup</td>
+<td>Safety</td>
+<td>Trust</td>
+<td>Add</td>
+<td>SAFE-01</td>
+<td>safety</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>SAFE-06</td>
+<td>Scam interstitial</td>
+<td>Safety</td>
+<td>Warn</td>
+<td>Dismiss/report</td>
+<td>MSG-03</td>
+<td>moderation</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SAFE-10</td>
+<td>Account status/appeal</td>
+<td>Safety</td>
+<td>Transparency</td>
+<td>Appeal</td>
+<td>—</td>
+<td>appeals</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-01</td>
+<td>Settings</td>
+<td>Settings</td>
+<td>Hub</td>
+<td>Choose</td>
+<td>SET-*</td>
+<td>me</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-02</td>
+<td>Edit profile</td>
+<td>Settings</td>
+<td>Edit</td>
+<td>Save</td>
+<td>PROF-01</td>
+<td>profile</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-03</td>
+<td>Privacy</td>
+<td>Settings</td>
+<td>Controls</td>
+<td>Toggle</td>
+<td>—</td>
+<td>privacy</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-03a</td>
+<td>Discovery prefs</td>
+<td>Settings</td>
+<td>Filters</td>
+<td>Save</td>
+<td>—</td>
+<td>prefs</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-03b</td>
+<td>Intent &amp; dating</td>
+<td>Settings</td>
+<td>Intent</td>
+<td>Save</td>
+<td>—</td>
+<td>prefs</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-04</td>
+<td>Notifications</td>
+<td>Settings</td>
+<td>Controls</td>
+<td>Toggle</td>
+<td>—</td>
+<td>notif prefs</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-05</td>
+<td>Location</td>
+<td>Settings</td>
+<td>Change</td>
+<td>Save</td>
+<td>—</td>
+<td>prefs</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-05a</td>
+<td>Recommendation transparency</td>
+<td>Settings</td>
+<td>Trust</td>
+<td>Reset</td>
+<td>—</td>
+<td>recs</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>SET-06</td>
+<td>Security/sessions</td>
+<td>Settings</td>
+<td>Devices</td>
+<td>Log out</td>
+<td>—</td>
+<td>sessions</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-06a</td>
+<td>Verification status</td>
+<td>Settings</td>
+<td>Verify</td>
+<td>Start</td>
+<td>PROF-03</td>
+<td>verification</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-06b</td>
+<td>Blocked users</td>
+<td>Settings</td>
+<td>Manage</td>
+<td>Unblock</td>
+<td>—</td>
+<td>blocks</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-07</td>
+<td>Logout</td>
+<td>Settings</td>
+<td>Session end</td>
+<td>Confirm</td>
+<td>AUTH-02</td>
+<td>logout</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-08</td>
+<td>Data controls</td>
+<td>Settings</td>
+<td>Rights</td>
+<td>Export/Delete</td>
+<td>DEL-01</td>
+<td>export/delete</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-09</td>
+<td>Restore account</td>
+<td>Settings</td>
+<td>Restore</td>
+<td>Restore</td>
+<td>HOME</td>
+<td>delete/restore</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-10</td>
+<td>Help &amp; support</td>
+<td>Settings</td>
+<td>Help</td>
+<td>Contact</td>
+<td>—</td>
+<td>support</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SET-11</td>
+<td>Legal</td>
+<td>Settings</td>
+<td>Policies</td>
+<td>Read</td>
+<td>—</td>
+<td>—</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>DEL-01–DEL-05</td>
+<td>Deletion flow</td>
+<td>Settings</td>
+<td>Delete</td>
+<td>Confirm</td>
+<td>AUTH-02</td>
+<td>delete</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>SUB-01–07</td>
+<td>Subscription screens</td>
+<td>Monetization</td>
+<td>Pay/manage</td>
+<td>Subscribe</td>
+<td>—</td>
+<td>billing</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>ADM-01–09</td>
+<td>Admin console</td>
+<td>Admin</td>
+<td>Moderation</td>
+<td>Act</td>
+<td>—</td>
+<td>admin</td>
+<td>MVP-lite/V2</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-36-complete-user-flows">PART 36 — COMPLETE USER FLOWS</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Flow ID</th>
+<th>Goal</th>
+<th>Start</th>
+<th>Steps</th>
+<th>Decision points</th>
+<th>Ending state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F01</td>
+<td>New signup</td>
+<td>AUTH-02</td>
+<td>Welcome → phone → OTP → ONB</td>
+<td>OTP valid? Age ≥18?</td>
+<td>HOME with recs</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>Existing login</td>
+<td>AUTH-05</td>
+<td>Phone → OTP → route</td>
+<td>Suspended? Onboarding done?</td>
+<td>HOME or SAFE-10</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>Forgot access</td>
+<td>AUTH-06</td>
+<td>Recovery email → verify → new phone OTP</td>
+<td>Email on file?</td>
+<td>Logged in, cooldown 24h</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>Complete onboarding</td>
+<td>ONB-01</td>
+<td>01→11</td>
+<td>Skip steps; location denied; unsupported city</td>
+<td>HOME</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>Edit profile</td>
+<td>PROF-01</td>
+<td>Edit → save → moderation</td>
+<td>Photo passes?</td>
+<td>Updated profile</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>Discover person</td>
+<td>CIR-04/DISC-03</td>
+<td>Open Circle → members → profile</td>
+<td>Blocked/deleted?</td>
+<td>PROF-02</td>
+</tr>
+<tr>
+<td>F07</td>
+<td>Connect</td>
+<td>PROF-02</td>
+<td>Connect → choose type → note → send</td>
+<td>Shared Circle? Verified? Limit?</td>
+<td>Request pending</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>Accept connection</td>
+<td>CONN-02</td>
+<td>View → choose response</td>
+<td>Dating eligible?</td>
+<td>Connection or private decline</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>Start conversation</td>
+<td>MSG-03</td>
+<td>Open chat → starter → send</td>
+<td>Filter pass?</td>
+<td>Message delivered</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Join community</td>
+<td>COMM-01</td>
+<td>Join</td>
+<td>Eligible (verified-only)?</td>
+<td>Joined</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Create community</td>
+<td>COMM-04</td>
+<td>Steps→approval</td>
+<td>Passes checks?</td>
+<td>Live/in review (V2)</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Post in community</td>
+<td>COMM-03</td>
+<td>Compose→moderate→publish</td>
+<td>Filter?</td>
+<td>Post live (V2)</td>
+</tr>
+<tr>
+<td>F13</td>
+<td>Create event</td>
+<td>EVT-02</td>
+<td>Fields→checks→publish</td>
+<td>Verified host? Public venue?</td>
+<td>Live</td>
+</tr>
+<tr>
+<td>F14</td>
+<td>Join event</td>
+<td>EVT-01</td>
+<td>RSVP → reminders → check-in</td>
+<td>Full? Cancelled?</td>
+<td>Attended</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>Friendship progression</td>
+<td>CIR-01</td>
+<td>Join→attend×2→prompt→request→accept→chat→friend</td>
+<td>Mutual?</td>
+<td>Friend badge</td>
+</tr>
+<tr>
+<td>F16</td>
+<td>Dating progression</td>
+<td>CIR-01</td>
+<td>Join→connect(Dating)→mutual→chat→date→feedback</td>
+<td>Both Dating? Safety card?</td>
+<td>Continue/pause/end</td>
+</tr>
+<tr>
+<td>F17</td>
+<td>Unmatch/end</td>
+<td>MSG-03</td>
+<td>⋯→End→confirm</td>
+<td>Confirm?</td>
+<td>Chat closed silently</td>
+</tr>
+<tr>
+<td>F18</td>
+<td>Block</td>
+<td>Profile/Chat</td>
+<td>⋯→Block→confirm</td>
+<td>Shared Circle?</td>
+<td>Mutual invisibility</td>
+</tr>
+<tr>
+<td>F19</td>
+<td>Report</td>
+<td>⋯</td>
+<td>Category→evidence→submit</td>
+<td>Severity?</td>
+<td>Case ID + protection</td>
+</tr>
+<tr>
+<td>F20</td>
+<td>Safety incident</td>
+<td>EVT-03</td>
+<td>Help→call 112/message host/alert contact→report</td>
+<td>Immediate danger?</td>
+<td>Escalation + case</td>
+</tr>
+<tr>
+<td>F21</td>
+<td>Upgrade</td>
+<td>SUB-01</td>
+<td>Plan→pay→entitlement</td>
+<td>Payment ok?</td>
+<td>Premium (V2)</td>
+</tr>
+<tr>
+<td>F22</td>
+<td>Cancel subscription</td>
+<td>SUB-03</td>
+<td>Cancel→reason→confirm</td>
+<td>Pause offered?</td>
+<td>Ends at period end</td>
+</tr>
+<tr>
+<td>F23</td>
+<td>Logout</td>
+<td>SET-07</td>
+<td>Confirm→revoke</td>
+<td>Unsent drafts?</td>
+<td>AUTH-02</td>
+</tr>
+<tr>
+<td>F24</td>
+<td>Delete account</td>
+<td>SET-08</td>
+<td>DEL-01→05</td>
+<td>Host of Circles? Active subscription?</td>
+<td>Pending deletion→hard delete</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="sample-flow-in-the-requested-notation-f07-connect">Sample flow in the requested notation (F07 Connect)</h2>
+<pre><code class="language-text">START
+  ↓
+PROF-02 (viewing person from shared Circle)
+  ↓
+USER ACTION: tap Connect
+  ↓
+DECISION: Are you photo-verified and share a Circle/Activity? Under weekly limit?
+ ┌───────────────┴───────────────┐
+YES                              NO
+ ↓                                ↓
+CONN-01 compose                  Sheet: &quot;Verify to connect&quot; (PROF-03)
+ ↓                               or &quot;Weekly limit reached&quot;
+Send
+ ↓
+DECISION: Content filter pass?
+ ┌───────┴────────┐
+YES              NO
+ ↓                ↓
+Request pending   Edit note (guidelines shown)
+ ↓
+NEXT ACTION: recipient notified; A returns to Circle
+</code></pre>
+<hr />
+<h1 id="part-37-uiux-design-system">PART 37 — UI/UX DESIGN SYSTEM</h1>
+<p><strong>Feel:</strong> modern · social · safe · mature · Indian · community-oriented. <strong>Not:</strong> dark, flirty, gradient-flame, swipe-card aesthetics.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Philosophy</td>
+<td>"Warm, calm, and human." Photography of activities and places over glamour shots; generous whitespace; one action per card</td>
+</tr>
+<tr>
+<td>Color</td>
+<td>Warm neutrals base (off-white <code>#FAF7F2</code>, ink <code>#1F2430</code>). Primary: deep saffron-terracotta or marigold accent (avoid pure red = Tinder); secondary: teal/indigo for trust/safety; success green; caution amber; critical red only for safety. Category tints for interests (soft). Dark mode supported. Ensure WCAG AA contrast</td>
+</tr>
+<tr>
+<td>Typography</td>
+<td>Sans with strong Devanagari/regional-script support (e.g., Noto Sans family or Inter + Noto Sans Devanagari); 3 sizes for body, 3 for headings; support 200% font scaling; avoid text in images</td>
+</tr>
+<tr>
+<td>Spacing</td>
+<td>4pt grid; 16px screen gutters; 12–16px card padding; 24px section gaps</td>
+</tr>
+<tr>
+<td>Cards</td>
+<td>Rounded (16px), subtle shadow, image-first; consistent layout: title, meta, "why for you", CTA</td>
+</tr>
+<tr>
+<td>Buttons</td>
+<td>Primary filled (one per screen), secondary outlined, tertiary text; 48px min touch target; destructive in red only in confirm dialogs</td>
+</tr>
+<tr>
+<td>Icons</td>
+<td>Outline set, 24px; avoid heart/flame metaphors; use hand-wave/circle/people motifs</td>
+</tr>
+<tr>
+<td>Navigation</td>
+<td>5-item bottom tab bar; labels always shown</td>
+</tr>
+<tr>
+<td>Profile components</td>
+<td>Photo carousel with verification badge; "Why you might get along" chip block; social-style chips</td>
+</tr>
+<tr>
+<td>Community components</td>
+<td>Community header, Circle card (member avatars stack, spots left), Activity card</td>
+</tr>
+<tr>
+<td>Chat components</td>
+<td>Bubble with context header; system messages muted; poll component; safety strip; typing/read (V2)</td>
+</tr>
+<tr>
+<td>Notification components</td>
+<td>In-app row with icon, text, timestamp, unread dot; grouped</td>
+</tr>
+<tr>
+<td>Modals</td>
+<td>Bottom sheets for quick decisions; center dialogs only for destructive/critical</td>
+</tr>
+<tr>
+<td>Error states</td>
+<td>Inline, human copy, single recovery action; illustrations light</td>
+</tr>
+<tr>
+<td>Empty states</td>
+<td>Illustration + one-line + one CTA; never blame the user</td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>Screen reader labels, focus order, captions for any audio (V2), no color-only cues, reduced motion setting, tap targets ≥48dp, dynamic type</td>
+</tr>
+<tr>
+<td>Localization</td>
+<td>English + Hinglish MVP; string externalization from day one; RTL not needed initially; date/time in IST, 12h with AM/PM default</td>
+</tr>
+<tr>
+<td>Motion</td>
+<td>Minimal; 200–300ms; no celebratory gamification</td>
+</tr>
+<tr>
+<td>Indian context cues</td>
+<td>Regional festival themed Circle suggestions (V2), regional language chips, rupee formatting (₹1,00,000 Indian grouping), phone-first flows, low-end Android performance (APK size, 2G/3G tolerance, image compression)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-38-design-principles">PART 38 — DESIGN PRINCIPLES</h1>
+<ol>
+<li><strong>Context before contact.</strong> No one can contact a stranger; contact arises from shared Circles/Activities.</li>
+<li><strong>Do not optimize for swipes, likes or time-in-app.</strong> Optimize for repeated positive interaction (MCR).</li>
+<li><strong>Small groups beat big feeds.</strong> Default social unit is 4–8 people.</li>
+<li><strong>Users control intent.</strong> Friends, Dating, Activities, Unsure — changeable, private, and never forced.</li>
+<li><strong>Dating is an outcome, not the entry.</strong> Mutual escalation only.</li>
+<li><strong>Safety is architecture, not a feature.</strong> Defaults protect the user; reporting is always one tap away.</li>
+<li><strong>Privacy by default and by minimization.</strong> Collect only what changes a recommendation or a safety setting; approximate location only.</li>
+<li><strong>Explain recommendations.</strong> Every card says why; no fake compatibility percentages.</li>
+<li><strong>AI assists; it doesn't impersonate or manipulate.</strong> No AI-written messages sent on behalf of users; no AI "partners".</li>
+<li><strong>Offline is optional and supported.</strong> Online-first paths for anxious users; public places, check-ins and help for offline.</li>
+<li><strong>Rejection is gentle and private.</strong> No public "declined" states; no shame mechanics.</li>
+<li><strong>No dark patterns.</strong> No FOMO notifications, hidden paywalls, or streaks.</li>
+<li><strong>Hosts are partners.</strong> Give them tools, guidelines and accountability.</li>
+<li><strong>Progress through repetition.</strong> Design for the second and third meeting, not the first swipe.</li>
+<li><strong>Build for India.</strong> Low-end Android, multilingual, phone-first, culturally aware privacy, and regionally relevant interests.</li>
+</ol>
+<hr />
+<h1 id="part-39-mvp-boundary">PART 39 — MVP BOUNDARY</h1>
+<h2 id="mvp-target-usable-pilot-in-one-city">MVP (target: usable pilot in one city)</h2>
+<ul>
+<li>Auth (phone OTP), age gate, onboarding (intent, interests, social style, location, safety defaults)</li>
+<li>Profile (photo, one-liner, interests) + photo verification</li>
+<li>Home with recommended Circles/Activities (rules-based)</li>
+<li>Discover (Circles, Activities, light Communities), filters</li>
+<li>Circles: join/request/leave, member list, host tools (basic)</li>
+<li>Circle creation (verified hosts) + Activity creation + RSVP + reminders + check-in + post-activity feedback</li>
+<li>Circle group chat (text, emoji, poll)</li>
+<li>Connection requests with shared-context rule; 1:1 chat after mutual</li>
+<li>Report/block/end connection, Safety Center, message safety filter, admin queue (lite)</li>
+<li>Notifications (push + in-app) with controls</li>
+<li>Settings, logout, account deletion + data export</li>
+<li>Analytics + consent records</li>
+</ul>
+<h2 id="post-mvp-months-46-if-signals-justify">Post-MVP (months 4–6, if signals justify)</h2>
+<p>Dating date-planning pilot (in zones with balanced supply), trusted-contact alerts, improved recommender (LTR prep), image sharing in chat, better host analytics.</p>
+<h2 id="v2">V2</h2>
+<p>People discovery (curated), community posts/comments/reactions, community creation, paid Activities &amp; premium, calendar, reply/typing/read receipts, travel mode, Restrict, moderator assist LLM, second city.</p>
+<h2 id="v3">V3</h2>
+<p>Multi-city graph, voice notes/calls, creator/host monetization, workplace/student verification, brand/venue partnerships, relationship-outcome models.</p>
+<h2 id="do-not-build-in-the-first-6-months">⛔ DO NOT BUILD IN THE FIRST 6 MONTHS</h2>
+<p>Infinite feed · Stories/Reels · follower/like counts · influencer marketplace · Discord-style large community chat/voice channels · personality tests · compatibility percentages · AI dating coach or AI companions · livestreaming · crypto/AR/VR · full ticketing marketplace · huge swipe deck · hundreds of filters · public social handles · contact-list matching · global people search · national rollout · in-app payments between users · complicated gamification/streaks.</p>
+<hr />
+<h1 id="part-40-development-phases">PART 40 — DEVELOPMENT PHASES</h1>
+<blockquote>
+<p>Durations are rough planning assumptions for a small team (2–4 engineers, 1 designer, 1 PM/community lead). Validate with your team.</p>
+</blockquote>
+<h3 id="phase-0-validation-weeks-18-no-app">Phase 0 — Validation (Weeks 1–8, no app)</h3>
+<ul>
+<li><strong>Features:</strong> Landing page, waitlist form, interviews, manual Circles via WhatsApp/Airtable, manual matching</li>
+<li><strong>Dependencies:</strong> City/cohort decision; host recruitment</li>
+<li><strong>Eng tasks:</strong> None (no-code)</li>
+<li><strong>QA:</strong> Process checklist for safety (venue rules, code of conduct)</li>
+<li><strong>Metrics:</strong> Interview patterns; % of waitlist attending an Activity; repeat attendance; safety incidents</li>
+<li><strong>Exit:</strong> ≥100 participants; ≥ (define) % attend 2+ Activities with the same Circle; hosts creating Activities without your prompting</li>
+</ul>
+<h3 id="phase-1-auth-onboarding-weeks-912">Phase 1 — Auth + onboarding (Weeks 9–12)</h3>
+<ul>
+<li><strong>Features:</strong> AUTH-<em>, ONB-</em>, consent, config/force-update</li>
+<li><strong>Dependencies:</strong> SMS/DLT registration; design; legal drafts (ToS/Privacy)</li>
+<li><strong>Eng tasks:</strong> Auth service, token model, onboarding step persistence, interest taxonomy seed, location/zone service</li>
+<li><strong>QA:</strong> OTP matrix, age gate, resume onboarding, offline behaviors</li>
+<li><strong>Metrics:</strong> Signup completion, step drop-off, OTP success rate, time to first recommendation</li>
+<li><strong>Exit:</strong> ≥70% completion of onboarding in test cohort; OTP success ≥ 95%</li>
+</ul>
+<h3 id="phase-2-profiles-interests-weeks-1114">Phase 2 — Profiles + interests (Weeks 11–14)</h3>
+<ul>
+<li><strong>Features:</strong> PROF-*, media upload, photo verification, moderation for photos</li>
+<li><strong>Eng:</strong> Media pipeline, vendor liveness integration, profile APIs</li>
+<li><strong>QA:</strong> Photo rules, verification failure modes, privacy visibility</li>
+<li><strong>Metrics:</strong> Photo verification pass rate, profile completion</li>
+<li><strong>Exit:</strong> Verified rate ≥ target; no critical privacy leaks</li>
+</ul>
+<h3 id="phase-3-discovery-weeks-1316">Phase 3 — Discovery (Weeks 13–16)</h3>
+<ul>
+<li><strong>Features:</strong> HOME-01, DISC-01, filters, rules-based ranking, reason codes</li>
+<li><strong>Eng:</strong> Recommendation service v1, logging of impressions, admin content curation</li>
+<li><strong>QA:</strong> Ranking sanity tests; empty states; sparse zone behavior</li>
+<li><strong>Metrics:</strong> Home → Circle view → join conversion</li>
+<li><strong>Exit:</strong> ≥ X% of new users join a Circle in 7 days</li>
+</ul>
+<h3 id="phase-4-circlescommunities-weeks-1520">Phase 4 — Circles/communities (Weeks 15–20)</h3>
+<ul>
+<li><strong>Features:</strong> COMM-01, CIR-*, create flows, host tools, Circle admin</li>
+<li><strong>Eng:</strong> Circle lifecycle, capacity transactions, approval flows</li>
+<li><strong>QA:</strong> Race conditions, host leaving, capacity edge cases</li>
+<li><strong>Metrics:</strong> Circle fill rate, activation, host retention</li>
+<li><strong>Exit:</strong> Circles reach ≥4 members; hosts create second Activity</li>
+</ul>
+<h3 id="phase-5-connections-weeks-1922">Phase 5 — Connections (Weeks 19–22)</h3>
+<ul>
+<li><strong>Features:</strong> CONN-*, escalation rules, limits, cooldowns</li>
+<li><strong>Eng:</strong> Eligibility engine (shared context, intent compatibility), request lifecycle</li>
+<li><strong>QA:</strong> Matrix of intent combos; privacy (no intent leak)</li>
+<li><strong>Metrics:</strong> Request rate, acceptance rate, time to connection</li>
+<li><strong>Exit:</strong> Acceptance and safety metrics within thresholds</li>
+</ul>
+<h3 id="phase-6-messaging-weeks-1824">Phase 6 — Messaging (Weeks 18–24)</h3>
+<ul>
+<li><strong>Features:</strong> MSG-*, group/1:1 chat, polls, message filter</li>
+<li><strong>Eng:</strong> Realtime stack (WebSocket, push), history store, moderation hooks</li>
+<li><strong>QA:</strong> Delivery, ordering, offline sync, spam bursts</li>
+<li><strong>Metrics:</strong> Message success, group activity, filter precision</li>
+<li><strong>Exit:</strong> p95 delivery &lt; target; zero data-loss incidents</li>
+</ul>
+<h3 id="phase-7-activities-weeks-2226">Phase 7 — Activities (Weeks 22–26)</h3>
+<ul>
+<li><strong>Features:</strong> EVT-*, RSVP, reminders, check-in, feedback</li>
+<li><strong>Eng:</strong> Scheduling, reminders, check-in state machine</li>
+<li><strong>QA:</strong> Timezone, cancellations, no-shows, help button</li>
+<li><strong>Metrics:</strong> RSVP→attendance, repeat attendance, feedback response</li>
+<li><strong>Exit:</strong> ≥ target repeat attendance; incident response tested</li>
+</ul>
+<h3 id="phase-8-dating-weeks-2630-gated">Phase 8 — Dating (Weeks 26–30, gated)</h3>
+<ul>
+<li><strong>Features:</strong> Dating escalation opt-in, DATE-*</li>
+<li><strong>Dependencies:</strong> Balanced supply by zone; safety readiness</li>
+<li><strong>Eng:</strong> Dating eligibility, date planner, safety card</li>
+<li><strong>QA:</strong> Mismatched-intent scenarios, harassment simulations</li>
+<li><strong>Metrics:</strong> Mutual dating opt-in, report rate, date completion</li>
+<li><strong>Exit:</strong> Report rate below threshold; women/NB satisfaction not degraded</li>
+</ul>
+<h3 id="phase-9-safety-moderation-continuous-hardened-by-week-24">Phase 9 — Safety + moderation (continuous; hardened by Week 24)</h3>
+<ul>
+<li><strong>Features:</strong> Full reporting, admin console, appeals, ban evasion signals</li>
+<li><strong>Eng:</strong> Triage service, audit logs, RBAC, evidence store</li>
+<li><strong>QA:</strong> Abuse scenarios, red-team tests, SLA drills</li>
+<li><strong>Metrics:</strong> Time-to-first-action, appeals overturned, false positives</li>
+<li><strong>Exit:</strong> SLA compliance ≥ target for 4 weeks</li>
+</ul>
+<h3 id="phase-10-monetization-v2">Phase 10 — Monetization (V2)</h3>
+<ul>
+<li><strong>Features:</strong> SUB-*, paid Activities</li>
+<li><strong>Eng:</strong> Billing/receipts, entitlements</li>
+<li><strong>QA:</strong> Payment failures, restore, refunds</li>
+<li><strong>Metrics:</strong> Conversion, ARPPU, refund/complaint rate</li>
+<li><strong>Exit:</strong> Payers don't reduce Circle quality metrics</li>
+</ul>
+<h3 id="phase-11-analytics-optimization">Phase 11 — Analytics + optimization</h3>
+<ul>
+<li><strong>Features:</strong> Dashboards, cohorts, experiments, LTR prep</li>
+<li><strong>Eng:</strong> Event pipeline, warehouse, model training pipeline</li>
+<li><strong>QA:</strong> Event schema validation</li>
+<li><strong>Metrics:</strong> MCR, D30 retention, network density</li>
+<li><strong>Exit:</strong> Decision to expand city or double down on density</li>
+</ul>
+<hr />
+<h1 id="part-41-qa-testing">PART 41 — QA &amp; TESTING</h1>
+<p>For each area: <strong>Happy path (H), Failure path (F), Edge (E), Abuse (A), Security (S)</strong>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Test scenarios</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Signup/OTP</strong></td>
+<td>H: valid phone → OTP → onboarding. F: wrong OTP ×5 → lockout; expired OTP; SMS not delivered → resend. E: number with spaces/+91; app backgrounded during OTP; dual-SIM. A: OTP bombing on victim's number (rate limits); mass account creation (device/IP limits). S: OTP brute force; response uniformity (no enumeration); token theft</td>
+</tr>
+<tr>
+<td><strong>Age gate</strong></td>
+<td>H: 18+ passes. F: &lt;18 blocked. E: DOB exactly 18 today; leap-day; timezone edge. A: repeated DOB retries; changing device. S: server-side validation only</td>
+</tr>
+<tr>
+<td><strong>Onboarding</strong></td>
+<td>H: full complete. F: kill app mid-flow → resume. E: skip optional; location denied; unsupported city. A: profanity in name. S: tampered payloads</td>
+</tr>
+<tr>
+<td><strong>Profile/photos</strong></td>
+<td>H: upload photo → moderation pass. F: no face; NSFW; upload failure. E: HEIC/large images. A: stolen celebrity photo; duplicate photo across accounts. S: signed URL expiry; EXIF stripping (GPS)</td>
+</tr>
+<tr>
+<td><strong>Verification</strong></td>
+<td>H: liveness pass. F: mismatch → retry → review. E: poor light; glasses. A: replay/deepfake attempt. S: vendor callback signature</td>
+</tr>
+<tr>
+<td><strong>Recommendations</strong></td>
+<td>H: interests → relevant Circles. F: empty zone. E: single interest; huge radius. A: gaming ranking via fake joins. S: no leakage of hidden users</td>
+</tr>
+<tr>
+<td><strong>Circles/communities</strong></td>
+<td>H: join → chat. F: full Circle. E: concurrent joins at capacity; host leaves. A: spam Circle creation; recruiting for off-platform scams. S: permission checks on host actions</td>
+</tr>
+<tr>
+<td><strong>Connections</strong></td>
+<td>H: request → accept → chat. F: sender blocked. E: simultaneous requests A↔B (dedupe). A: mass requests; note with phone/link. S: intent not leaked via API responses (server enforces compatibility)</td>
+</tr>
+<tr>
+<td><strong>Messaging</strong></td>
+<td>H: send/receive real-time. F: offline send → retry. E: long messages, emoji, Indic scripts. A: harassment, sexual content, scam messages. S: authorization on conversation IDs (IDOR), WebSocket auth</td>
+</tr>
+<tr>
+<td><strong>Dating</strong></td>
+<td>H: mutual → chat → date plan. F: mismatched intent gracefully converts. E: user pauses dating. A: pressure to share contact/move off-platform. S: orientation data access controls</td>
+</tr>
+<tr>
+<td><strong>Events</strong></td>
+<td>H: RSVP → check-in → feedback. F: cancellation notifications. E: capacity, timezone, venue change. A: fake events for scams. S: venue reveal only to RSVPed</td>
+</tr>
+<tr>
+<td><strong>Payments (V2)</strong></td>
+<td>H: purchase → entitlement. F: declined payment; restore. E: family sharing; currency. A: refund abuse. S: receipt validation server-side</td>
+</tr>
+<tr>
+<td><strong>Safety</strong></td>
+<td>H: report → case → outcome. F: report submission fails → retry/offline queue. E: reporting after block. A: false mass-reporting to silence people. S: evidence access logging</td>
+</tr>
+<tr>
+<td><strong>Notifications</strong></td>
+<td>H: correct deep link. F: token invalid. E: quiet hours; muted Circles. A: notification spam by host (rate limits)</td>
+</tr>
+<tr>
+<td><strong>Account deletion</strong></td>
+<td>H: delete → restore within 30d. F: active host/subscription blocks. E: delete while suspended. A: deletion to evade ban (persist ban signals). S: re-auth required; hard-delete job verification; export correctness</td>
+</tr>
+<tr>
+<td><strong>Performance/compat</strong></td>
+<td>Low-end Android (2–3 GB RAM), slow networks, battery, app size, accessibility (TalkBack), Hindi/Hinglish rendering</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Release gates:</strong> zero known S3 safety bugs; privacy review passed; security review (OWASP MASVS-aligned mobile testing; API security testing); load test for Circle join race and chat fan-out.</p>
+<hr />
+<h1 id="part-42-analytics-events">PART 42 — ANALYTICS EVENTS</h1>
+<p><strong>Event convention:</strong> <code>object_action</code>, snake_case; global properties: <code>user_id_hash</code>, <code>session_id</code>, <code>app_version</code>, <code>platform</code>, <code>city_id</code>, <code>zone_id</code>, <code>intent_set</code>, <code>verification_level</code>, <code>experiment_variants</code>, <code>timestamp</code>. <strong>Do not log message content, exact location, or sensitive attributes (orientation).</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Trigger</th>
+<th>Key properties</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app_opened</code></td>
+<td>Cold/warm start</td>
+<td>source, days_since_last</td>
+<td>Retention</td>
+</tr>
+<tr>
+<td><code>welcome_viewed</code></td>
+<td>AUTH-02</td>
+<td>variant</td>
+<td>Copy tests</td>
+</tr>
+<tr>
+<td><code>signup_started</code></td>
+<td>Tap Get started</td>
+<td>referrer</td>
+<td>Funnel</td>
+</tr>
+<tr>
+<td><code>otp_requested</code> / <code>otp_verified</code> / <code>otp_failed</code></td>
+<td>OTP steps</td>
+<td>channel, reason</td>
+<td>Delivery health</td>
+</tr>
+<tr>
+<td><code>signup_completed</code></td>
+<td>Account created</td>
+<td>method</td>
+<td>Funnel</td>
+</tr>
+<tr>
+<td><code>age_gate_blocked</code></td>
+<td>Under 18</td>
+<td>— (no DOB)</td>
+<td>Compliance</td>
+</tr>
+<tr>
+<td><code>onboarding_started/step_completed/completed</code></td>
+<td>ONB</td>
+<td>step, skipped</td>
+<td>Drop-off</td>
+</tr>
+<tr>
+<td><code>intent_selected</code></td>
+<td>ONB-02</td>
+<td>values</td>
+<td>Segmentation</td>
+</tr>
+<tr>
+<td><code>interest_selected</code></td>
+<td>ONB-03</td>
+<td>interest_id, level</td>
+<td>Taxonomy quality</td>
+</tr>
+<tr>
+<td><code>profile_completed</code></td>
+<td>ONB-09</td>
+<td>has_photo, has_oneliner</td>
+<td>Activation</td>
+</tr>
+<tr>
+<td><code>verification_started/passed/failed</code></td>
+<td>PROF-03</td>
+<td>type, reason</td>
+<td>Trust rate</td>
+</tr>
+<tr>
+<td><code>recommendations_served</code></td>
+<td>Recs API</td>
+<td>model_version, count</td>
+<td>Model audits</td>
+</tr>
+<tr>
+<td><code>home_card_impression/tapped</code></td>
+<td>HOME-01</td>
+<td>object_type, position, reason</td>
+<td>Ranking learning</td>
+</tr>
+<tr>
+<td><code>community_viewed/joined/left</code></td>
+<td>COMM-01</td>
+<td>community_id</td>
+<td>Interest health</td>
+</tr>
+<tr>
+<td><code>circle_viewed/join_requested/joined/left</code></td>
+<td>CIR-01</td>
+<td>circle_id, fill, host_id</td>
+<td>Core loop</td>
+</tr>
+<tr>
+<td><code>circle_created</code> / <code>create_step_completed</code></td>
+<td>CIR-1x</td>
+<td>step, type</td>
+<td>Supply</td>
+</tr>
+<tr>
+<td><code>activity_viewed/rsvp/cancelled</code></td>
+<td>EVT-01</td>
+<td>activity_id</td>
+<td>Demand</td>
+</tr>
+<tr>
+<td><code>activity_checked_in</code></td>
+<td>EVT-03</td>
+<td>timing</td>
+<td>Attendance</td>
+</tr>
+<tr>
+<td><code>activity_attended</code></td>
+<td>Host/check-in</td>
+<td>—</td>
+<td>Ground truth</td>
+</tr>
+<tr>
+<td><code>activity_feedback_submitted</code></td>
+<td>EVT-04</td>
+<td>score, keep_in_touch_count</td>
+<td>Quality</td>
+</tr>
+<tr>
+<td><code>profile_viewed</code></td>
+<td>PROF-02</td>
+<td>source</td>
+<td>Discovery</td>
+</tr>
+<tr>
+<td><code>connect_tapped</code> / <code>connection_sent</code></td>
+<td>CONN-01</td>
+<td>type, shared_context_type</td>
+<td>Escalation</td>
+</tr>
+<tr>
+<td><code>connection_accepted/declined</code></td>
+<td>CONN-02</td>
+<td>type, latency</td>
+<td>Mutuality</td>
+</tr>
+<tr>
+<td><code>conversation_started</code></td>
+<td>First message</td>
+<td>type</td>
+<td>Engagement</td>
+</tr>
+<tr>
+<td><code>message_sent</code></td>
+<td>Send</td>
+<td>conversation_type, has_prompt</td>
+<td>Health</td>
+</tr>
+<tr>
+<td><code>starter_used</code></td>
+<td>Prompt tapped</td>
+<td>template_id</td>
+<td>Prompt value</td>
+</tr>
+<tr>
+<td><code>event_viewed</code> / <code>event_joined</code></td>
+<td>(alias of activity events for parity)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>date_intent_selected</code></td>
+<td>Dating opt-in</td>
+<td>—</td>
+<td>Dating readiness</td>
+</tr>
+<tr>
+<td><code>date_planned/date_completed</code></td>
+<td>DATE flows</td>
+<td>—</td>
+<td>Outcome</td>
+</tr>
+<tr>
+<td><code>report_submitted</code></td>
+<td>SAFE-02</td>
+<td>category, target_type</td>
+<td>Safety</td>
+</tr>
+<tr>
+<td><code>block_user</code></td>
+<td>Block</td>
+<td>source</td>
+<td>Safety</td>
+</tr>
+<tr>
+<td><code>moderation_action_taken</code></td>
+<td>Admin</td>
+<td>action, severity, sla</td>
+<td>Ops</td>
+</tr>
+<tr>
+<td><code>paywall_viewed</code>, <code>subscription_started</code>, <code>subscription_cancelled</code>, <code>payment_failed</code></td>
+<td>Billing</td>
+<td>plan</td>
+<td>Revenue</td>
+</tr>
+<tr>
+<td><code>notification_sent/opened/disabled</code></td>
+<td>Push</td>
+<td>category</td>
+<td>Annoyance guard</td>
+</tr>
+<tr>
+<td><code>delete_account_started</code>, <code>account_deleted</code></td>
+<td>DEL flow</td>
+<td>reason</td>
+<td>Churn</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="derived-metrics">Derived metrics</h3>
+<ul>
+<li><strong>Positive interaction (for MCR):</strong> any of — (a) attended ≥2 Activities with at least one common attendee within 30 days; (b) messages on ≥2 different days with the same person/group after Activity; (c) accepted Connection followed by another interaction within 14 days. Refine with pilot data.</li>
+<li><strong>Repeat Interaction Rate:</strong> users returning to interact with the same people ÷ activated users.</li>
+<li><strong>Activation:</strong> user joined a Circle <strong>and</strong> attended/chatted within 14 days (define precisely).</li>
+<li><strong>Guardrails:</strong> report rate per 1,000 interactions, blocks per 1,000 connects, severe incident count, time-to-action.</li>
+</ul>
+<hr />
+<h1 id="part-43-end-to-end-user-stories">PART 43 — END-TO-END USER STORIES</h1>
+<h2 id="431-aarav-23-software-engineer-jaipur-bengaluru-friendship-primary-persona">43.1 Aarav, 23, software engineer, Jaipur → Bengaluru (friendship, primary persona)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Time</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Discovery</strong></td>
+<td>A colleague forwards a Circle invite link ("Sunday badminton, Koramangala").</td>
+</tr>
+<tr>
+<td><strong>Install &amp; open</strong></td>
+<td>Deep link → store → app; Splash → Welcome shows the invite card.</td>
+</tr>
+<tr>
+<td><strong>Signup</strong></td>
+<td>Phone + OTP → DOB (23) → Intent: <em>Make friends</em> + <em>Find people for activities</em>.</td>
+</tr>
+<tr>
+<td><strong>Onboarding</strong></td>
+<td>Interests: badminton, indie music, food; Taste: skips; Style: 4–6 people, activity-focused, planned; Location: Koramangala/HSR; Availability: Sunday mornings; Safety defaults accepted; Photo + one-liner "New to Bengaluru, badminton and filter coffee"; verifies photo.</td>
+</tr>
+<tr>
+<td><strong>First value</strong></td>
+<td>Lands on the invited Circle page: 5 members, host verified, beginner-friendly. Joins (request accepted in 40 min).</td>
+</tr>
+<tr>
+<td><strong>First prompt</strong></td>
+<td>Circle welcome poll: "Pick a court time" → chat lively.</td>
+</tr>
+<tr>
+<td><strong>Activity 1</strong></td>
+<td>RSVP → T-24h reminder → arrives, checks in → plays, coffee after. Post-activity: rates, picks 2 people he'd like to see again (private).</td>
+</tr>
+<tr>
+<td><strong>Activity 2 (next Sunday)</strong></td>
+<td>Same Circle; a "Keep in touch with Karthik?" prompt appears. He sends Friends request; accepted.</td>
+</tr>
+<tr>
+<td><strong>Friend</strong></td>
+<td>1:1 chat with context; they plan a food walk (Activity suggestion V2).</td>
+</tr>
+<tr>
+<td><strong>Romantic potential</strong></td>
+<td>Aarav's intent didn't include Dating; if he changes intent later, only mutual Dating opt-ins with someone from shared context are possible.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Retention path:</strong> <strong>Day 1:</strong> finishes onboarding, joins Circle, gets welcome prompt. <strong>Day 7:</strong> first Activity attended; feedback prompt; keep-in-touch. <strong>Day 30:</strong> attended 3–4 Activities, 2 connections, invited a colleague, is offered "Host a food walk". <strong>Day 90:</strong> hosts a Circle (photography walk), is community-verified; retention driven by weekly Circle rhythm, not notifications.</p>
+<h2 id="432-meera-26-dating-focused">43.2 Meera, 26, dating-focused</h2>
+<ul>
+<li><strong>Day 1:</strong> Intent = Dating + Friends; Circle join (women-verified, books &amp; cafés). Never receives DMs.</li>
+<li><strong>Day 7:</strong> Two Activities attended; a member (Rohan) also Dating-intent; feedback: "keep in touch" both ways.</li>
+<li><strong>Day 30:</strong> Rohan sends Dating connection; Meera accepts; DATE-00 → chat → date suggestion at a public café; safety card + trusted contact; post-date feedback.</li>
+<li><strong>Day 90:</strong> Continues seeing Rohan or pauses dating; stays in the Circle either way — social value persists (key retention property: the Circle doesn't disappear when dating ends).</li>
+</ul>
+<h2 id="433-kabir-24-friendship-focused-introvert">43.3 Kabir, 24, friendship-focused introvert</h2>
+<ul>
+<li><strong>Day 1:</strong> Prefers online-first, small groups (2–3); Circle offers an online first chat prompt.</li>
+<li><strong>Day 7:</strong> Attends a 5-person board game Activity; uses Circle chat as a comfort layer; leaves early without penalty.</li>
+<li><strong>Day 30:</strong> 2 friend connections; turns on quieter notification mode.</li>
+<li><strong>Day 90:</strong> Remains in a recurring Circle; has never used dating features (by design).</li>
+</ul>
+<h2 id="434-nisha-27-community-creator-host">43.4 Nisha, 27, community creator / host</h2>
+<ul>
+<li><strong>Day 1:</strong> Applies to host (already verified); gets host guide; creates "Saturday Street Photography".</li>
+<li><strong>Day 7:</strong> First Activity with 5 attendees; uses host tools; gets moderation help for a no-show issue.</li>
+<li><strong>Day 30:</strong> Circle recurring; earns "Host for 4 events"; recruits two friends; asked to co-host.</li>
+<li><strong>Day 90:</strong> Feels ownership; (V2) can create paid workshops. <strong>Host retention</strong> is a leading indicator for network health.</li>
+</ul>
+<hr />
+<h1 id="part-44-final-master-blueprint">PART 44 — FINAL MASTER BLUEPRINT</h1>
+<pre><code class="language-text">                          USER
+                            │
+                  AUTHENTICATION (phone OTP)
+                            │
+                 AGE GATE (18+) &amp; CONSENT
+                            │
+                       ONBOARDING
+        (intent · interests · social style · zone · safety defaults)
+                            │
+                   RECOMMENDATION (rules → LTR)
+                            │
+                          HOME
+                  &quot;What can I do this week?&quot;
+                            │
+        ┌───────────────────┼────────────────────┐
+     CIRCLES            ACTIVITIES          COMMUNITIES (hubs)
+        └───────────────────┼────────────────────┘
+                            │
+                  SMALL-GROUP INTERACTION
+                     (prompt · group chat)
+                            │
+                   REAL/ONLINE ACTIVITY
+                  (RSVP · check-in · feedback)
+                            │
+                    REPEAT (same people)
+                            │
+              MUTUAL CONNECTION (opt-in, shared context)
+                    ┌───────┼────────┐
+                 FRIEND   ACTIVITY   DATING (mutual only)
+                          BUDDY          │
+                                    DATE PLANNING + SAFETY
+                            │
+             RETENTION LOOP: next Activity · host creation
+                            │
+       MONETIZATION (V2): paid Activities → premium → host tools
+                            │
+       ACCOUNT: settings · logout · data export · deletion
+
+ Cross-cutting: Trust (verification, badges) · Safety (report, block,
+ check-in, Safety Center) · Moderation (queue, classifiers, appeals) ·
+ Privacy (zones, consent, minimization) · Analytics (MCR)
+</code></pre>
+<h2 id="what-the-original-44-part-outline-changed-summary">What the original 44-part outline changed (summary)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Original concept</th>
+<th>Final decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dating / Friendship / Community as modes</td>
+<td>One experience with intent; dating = mutual escalation</td>
+</tr>
+<tr>
+<td>People discovery with actions like Like/Pass/Follow</td>
+<td>Removed; only Connect (with shared context)</td>
+</tr>
+<tr>
+<td>Communities with posts, chat, media</td>
+<td>Light hubs in MVP; posts V2; no large chat</td>
+</tr>
+<tr>
+<td>Message requests</td>
+<td>Not built; no unsolicited inbox</td>
+</tr>
+<tr>
+<td>Search everything</td>
+<td>Limited in MVP; no global people search</td>
+</tr>
+<tr>
+<td>Voice notes, media, reactions everywhere</td>
+<td>Deferred (reactions and text only in MVP)</td>
+</tr>
+<tr>
+<td>Subscription in MVP</td>
+<td>Deferred to V2; events first</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="your-20-questions-where-answered">Your 20 questions — where answered</h2>
+<p>1 First open → Part 3 · 2 Screens → Parts 3–29 &amp; 35 · 3 Actions → per-screen sections · 4 Navigation → Part 34 · 5 People discovery → Parts 11, 15 · 6 Community discovery → Parts 10, 13 · 7 Friendship → Part 16 · 8 Dating → Part 17 · 9 Conversations → Parts 18–19 · 10 Offline → Part 20 · 11 Protection → Parts 24–25 · 12 Community moderation → Parts 13, 25 · 13 Backend → Parts 32–33 · 14 Data stored → Part 32 · 15 APIs → Part 33 · 16 Build first → Parts 39–40 · 17 Not to build → Part 39 · 18 Measure → Part 42 · 19 Scale → Part 45 (below) · 20 Journey → Parts 2, 43.</p>
+<hr />
+<h1 id="part-45-scaling-open-decisions-added">PART 45 — SCALING &amp; OPEN DECISIONS (added)</h1>
+<p><strong>Scaling path:</strong> 1 metro (zones, ≤300 active) → multiple zones/interests (1,000–5,000) → second city only when density/retention gates are hit (Part 40, Phase 11). Technical scale: monolith (FastAPI + PostgreSQL) first; extract chat/notification workers when needed; Redis for rate limits/queues; managed messaging if the team is small; avoid Kafka/Kubernetes for the pilot. Add OpenSearch/pgvector only when full-text or semantic similarity demonstrably needs it. Data layer: partition messages/events by time; separate analytics warehouse.</p>
+<p><strong>Open decisions for founder/legal/design (must resolve before build):</strong>
+1. Beachhead city and zones; supply of hosts and venues.
+2. Women-only/verified-only Circle policies: who may host, how gender is verified without harming privacy.
+3. Whether to require photo verification for <em>all</em> joins or only for connections/hosting (trade-off: friction vs. trust).
+4. E2E encryption vs. server-side moderation for 1:1 chats.
+5. Data retention periods (chats, verification selfies, moderation evidence) and DPDP consent/notice design; grievance officer appointment.
+6. Age-assurance approach beyond self-declared DOB.
+7. Platform-leakage strategy: what value keeps groups on-platform after week 2 (Activity coordination, RSVP, Circle history, host tools) — test in Phase 0.
+8. Trusted-contact and emergency workflows: legal review, cost of SMS alerts.
+9. Dating launch gate (gender balance thresholds) per zone.
+10. Monetization: paid Activity fee structure and app-store policy compliance.</p>
+<p><em>End of document.</em></p>
+</main></body></html>

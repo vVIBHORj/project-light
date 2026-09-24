@@ -1,0 +1,79 @@
+Create a high-fidelity Dribbble-style UI presentation shot for a dating app called "happn". 4:3 landscape canvas showing three iPhone-style mockups side by side, slightly staggered vertically (left one lower-centered, middle one highest, right one lowest and slightly smaller). Each phone has a thick glossy white bezel, ~44px corner radius, soft diffused drop shadow, and a 9:41 status bar with signal, wifi and battery icons.
+
+BACKGROUND: soft dreamy sky-blue gradient from pale ice blue (#DDEBFB) at top-left to periwinkle (#A9C4F5) at bottom, with large blurred lavender and cobalt light blobs, airy and cloud-like.
+
+OVERALL STYLE: iOS "liquid glass" / glassmorphism. Frosted translucent white surfaces (white at 30-60% opacity, 20-30px backdrop blur, 1px white inner border, subtle inner highlight). Fresh, optimistic, summery, youthful. Blue-dominant palette with real lifestyle photography. Generous rounded corners (pill buttons, 28px cards, circular icon buttons).
+
+TYPOGRAPHY: Playful hand-drawn bubbly display font (like Chewy / Lilita One) for hero words, in white with a thick navy outline and drop shadow, sticker-like, rotated about -5 degrees. UI text in clean geometric sans (Roboto or Inter): semibold near-black (#0B0F1A) for titles, grey (#6B7280) for secondary text, blue (#2F80ED) for links and job titles.
+
+SCREEN 1 (Onboarding): Full-bleed photo of a smiling young Asian woman with long wind-blown black hair, yellow tank top, polka-dot belt, blue jeans with a colorful bag charm, holding a smartphone, against a saturated blue sky with white clouds. Top center: small "happn" wordmark with a location-pin logo in white. Behind her, giant translucent frosted-glass letters "HAPPN" in chunky rounded font (white at 35% opacity), with her body overlapping the letters for depth. Over the photo at left, sticker-style "WE CROSSED PATHS" in bubbly white letters with navy outline, tilted, with small hand-drawn doodle dashes near the "WE". Bottom: a frosted white-to-light-blue bottom sheet (32px top radius) with a centered bold playful heading "Your Perfect Match Is One Swipe Away" in near-black, a 3-line grey subtitle "Discover genuine connections, meaningful chats, and exciting dating opportunities ahead", and a black pill "swipe to start" slider (52px tall) with a white circular knob holding a right arrow on the left and white "Get Started" text centered, sitting on a translucent track.
+
+SCREEN 2 (Home / Discover): Frosted blue-to-cyan gradient background. Header: 44px circular avatar (man with sunglasses) with a small "Good morning 👋" grey label above bold "Jenny Wilson"; on the right a frosted pill button "Map" with a map icon and a circular frosted bell button. Below, a horizontal category row of five glossy 3D squircle icons with gradient fills and soft shadows: All (blue, people), New here (purple, briefcase/tag), Online (green, person), Today (blue, calendar), Favored (red, heart), with 12px labels, "All" selected in bold. Hero profile card (28px radius, full width, tall) with a blue-tinted photo of a laughing blonde woman with a bob in a pink knit tank, arms raised, with faint "WE CROSSED PATHS" text ghosted behind her. Top-left frosted "New" chip, top-right frosted "🔥 92% Match" chip with a flame icon in a circle. Right edge vertical stack of four frosted circular buttons: chat bubble, heart, lightning bolt, close X. Bottom-left in white text: "Aisha, 26" with a blue verified badge, "Marketing Manager" beneath, then three frosted pill tags with tiny icons: Coffee, Photography, Indie Music. A blue gradient fades up from the card bottom. Bottom tab bar: white frosted, 5 items with 10px labels: Home (active, dark filled icon), Explore, a large center glossy dark-navy 3D orb button with a blue rim glow and white ring, Likes, Profile.
+
+SCREEN 3 (Map): Airy white-to-sky-blue gradient. Header: circular search button on left, centered "Map" title (20px semibold), circular bell button on right. Filter chips row: "All" (solid white, active), "Recent", "Nearby", "Hotspots" (translucent, cut off at the edge). Center: a radar-style circular map with concentric thin blue rings, faint street-map lines, radial light-blue glow, a glowing blue dot for the user with a pulse halo and small direction arrow. Three round 40px avatar bubbles with white borders orbit the dot, each topped by a small blue pill showing a match percentage: 92%, 90%, 96%. Bottom white rounded sheet: 64px rounded-square thumbnail of Aisha, "Aisha, 26" bold with blue verified badge, "Marketing Manager" in blue, a pin icon with "Notting Hill, London", and a circular outlined heart button at right. Below, three soft grey stat cards with icons: "200m away from you", "2 Encounters with you", "Today, 9:47 last crossed". Then "About" in bold and two lines of grey body text ("Coffee lover. Travel addict. Sunset chaser. I enjoy meaningful conversations, spontaneous adventures and good music."). Same 5-item tab bar with center orb.
+
+Ultra clean, pixel-perfect, 4K, sharp UI, soft shadows, no clutter, photorealistic portraits, modern iOS design language.
+
+Colors
+
+Role	Value
+Primary blue	
+#2F80ED
+Sky / gradient light	
+#DDEBFB
+Gradient mid	
+#BBD6F8
+Gradient deep (periwinkle)	
+#A9C4F5
+Card blue overlay	
+#4A90E2 at ~60%
+Text primary	
+#0B0F1A
+Text secondary	
+#6B7280
+Verified badge	
+#2D9CFF
+Match chip	
+#2F80ED bg, white text
+Like red	
+#FF4D5A
+Online green	
+#34C759
+New-here purple	
+#8B5CF6
+Orb navy	
+#0A1A4A with 
+#3B82F6 rim glow
+Glass fill	rgba(255,255,255,0.35) + blur(24px) + 1px rgba(255,255,255,0.6) border
+
+Typography
+
+Use	Font	Size / weight
+Hero sticker text	Chewy or Lilita One	44-52px, white, navy 3-4px stroke
+Section headline	Chewy (dark)	22-24px
+Screen title ("Map")	Inter / Roboto	20px, 600
+Name ("Aisha, 26")	Inter / Roboto	20-22px, 600-700
+Body / subtitle	Inter / Roboto	13px, 400, line-height 1.4
+Chips / labels	Inter / Roboto	10-12px, 500
+
+Shape and spacing
+
+Phone frame: 44px radius, 6-8px white bezel
+Cards: 28px radius; bottom sheets: 32px top radius
+Buttons: full pill (radius 999px); icon buttons: 44px circles
+Category icons: 52px squircles with a glossy 3D gradient and a top highlight
+Screen padding: 16px; gaps: 8/12/16px
+Shadows: 0 12px 40px rgba(47,128,237,0.25) for phones, 0 4px 16px rgba(0,0,0,0.08) for chips
+
+Icons
+
+Style: rounded 1.5-2px stroke line icons (Lucide, Phosphor, or SF Symbols style)
+Set needed: home, compass/explore, heart, user, search, bell, map, message-circle, zap, x, flame, map-pin, repeat (encounters), clock, coffee, camera, music, arrow-right, badge-check
+Category row uses filled 3D glass icons instead of line icons
+
+Effects
+
+Depth layering: the subject overlaps the giant translucent "HAPPN" text, which requires a cut-out subject PNG
+Blue duotone tint on the home card photo
+Radar pulse animation (expanding ring, 2s loop)
+Swipe-to-start slider: knob drags right, and the track fills black

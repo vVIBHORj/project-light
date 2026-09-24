@@ -1,0 +1,48 @@
+{
+  "common": {
+    "appName": "LIGHT",
+    "getStarted": "Shuru Karein",
+    "continue": "Aage Badhein",
+    "back": "Peeche",
+    "skip": "Chhodein",
+    "save": "Save Karein",
+    "cancel": "Cancel",
+    "retry": "Dobara Try Karein",
+    "join": "Join Karein",
+    "connect": "Connect Karein",
+    "offlineNotice": "Aap offline hain. Cached data dikh raha hai."
+  },
+  "auth": {
+    "welcomeTitle": "Aapka Perfect Match Bas Ek Swipe Door Hai",
+    "welcomeSubtitle": "Asli connections, meaningful chats aur exciting opportunities discover karein",
+    "weCrossedPaths": "WE CROSSED PATHS",
+    "createAccount": "Account Banayein",
+    "login": "Log In Karein",
+    "phoneLabel": "Phone Number",
+    "emailLabel": "Email Address",
+    "sendOtp": "Verification Code Bhejein",
+    "enterOtp": "6-digit Code Dalein",
+    "resendCode": "Code dobara bhejein"
+  },
+  "onboarding": {
+    "ageGateTitle": "Aapki umar kya hai?",
+    "ageGateSubtitle": "LIGHT sirf 18+ adults ke liye hai.",
+    "identityTitle": "Aapka naam kya hai?",
+    "intentTitle": "LIGHT par aap kya dhoondh rahe hain?",
+    "interestsTitle": "Apne interests chunein",
+    "interestsMinCount": "Matching Circles dhoondhne ke liye kam se kam 5 interests chunein"
+  },
+  "tabs": {
+    "home": "Home",
+    "discover": "Explore",
+    "circles": "Circles",
+    "messages": "Messages",
+    "me": "Me"
+  },
+  "emptyStates": {
+    "noNearby": "Aapke area mein abhi zyada activity nahi hai.",
+    "noCircles": "Is filter ke liye koi active Circle nahi mila.",
+    "noEvents": "Aas-paas abhi koi scheduled event nahi hai.",
+    "noMessages": "Mutual connection ke baad aapki conversations shuru hongi."
+  }
+}
