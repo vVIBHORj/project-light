@@ -130,10 +130,34 @@ export interface ConnectionRepository {
   removeConnection(connectionId: string, reason?: string): Promise<void>;
 }
 
+export interface SendMessageOptions {
+  type?: import('../../domain/types').MessageType;
+  mediaUri?: string;
+  systemCardPayload?: import('../../domain/types').SystemCardPayload;
+  senderAvatar?: string;
+}
+
 export interface MessageRepository {
-  getConversations(userId: string): Promise<Conversation[]>;
+  getConversations(
+    userId: string,
+    segment?: 'all' | 'circles' | 'connections' | 'requests'
+  ): Promise<Conversation[]>;
+  getConversationById(conversationId: string): Promise<Conversation | null>;
   getMessages(conversationId: string): Promise<Message[]>;
-  sendMessage(conversationId: string, senderId: string, senderName: string, body: string): Promise<Message>;
+  sendMessage(
+    conversationId: string,
+    senderId: string,
+    senderName: string,
+    body: string,
+    options?: SendMessageOptions
+  ): Promise<Message>;
+  respondToMessageRequest(
+    conversationId: string,
+    action: 'accepted' | 'declined' | 'blocked'
+  ): Promise<Conversation>;
+  toggleConversationMute(conversationId: string): Promise<boolean>;
+  deleteMessageForMe(messageId: string, userId: string): Promise<void>;
+  blockParticipant(conversationId: string, actorUserId: string): Promise<void>;
 }
 
 export interface EventRepository {

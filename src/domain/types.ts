@@ -247,14 +247,39 @@ export interface Connection {
   updatedAt: string;
 }
 
+export type ConversationType = 'direct' | 'circle' | 'request';
+export type MessageStatus = 'sending' | 'sent' | 'failed';
+export type MessageType = 'text' | 'image' | 'system_card' | 'announcement';
+
+export interface SystemCardPayload {
+  title: string;
+  subtitle?: string;
+  actionLabel?: string;
+  actionType?: 'rsvp_event' | 'join_circle' | 'view_community';
+  eventId?: string;
+  circleId?: string;
+  dateStr?: string;
+  venue?: string;
+}
+
 export interface Conversation {
   id: string;
-  type: 'circle' | 'direct';
+  type: ConversationType;
+  title?: string;
+  avatar?: string;
   objectId?: string;
   participantIds: string[];
+  participantProfiles?: UserProfile[];
   lastMessage?: string;
   lastMessageAt?: string;
   unreadCount: number;
+  sharedContext: string;
+  isBlocked?: boolean;
+  isMuted?: boolean;
+  requestStatus?: 'pending' | 'accepted' | 'declined';
+  requestOpeningMessage?: string;
+  pinnedPrompt?: string;
+  suggestedIcebreakers?: string[];
 }
 
 export interface Message {
@@ -262,9 +287,17 @@ export interface Message {
   conversationId: string;
   senderId: string;
   senderName: string;
+  senderAvatar?: string;
   body: string;
+  type?: MessageType;
+  mediaUri?: string;
+  mediaModerationState?: 'clean' | 'flagged' | 'unsafe';
+  systemCardPayload?: SystemCardPayload;
   createdAt: string;
+  status?: MessageStatus;
   moderationState: 'clean' | 'flagged' | 'hidden';
+  isOptimistic?: boolean;
+  errorReason?: string;
 }
 
 export interface SafetyReport {

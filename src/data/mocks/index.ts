@@ -1003,39 +1003,234 @@ export class MockConnectionRepository implements ConnectionRepository {
 }
 
 export class MockMessageRepository implements MessageRepository {
-  private conversations: Conversation[] = [
-    {
-      id: 'conv_1',
-      type: 'circle',
-      objectId: 'circle_1',
-      participantIds: ['user_1', 'user_3'],
-      lastMessage: 'Looking forward to the photo walk tomorrow!',
-      lastMessageAt: 'Yesterday',
-      unreadCount: 1,
-    },
-  ];
+  private conversations: Conversation[] = [];
+  private messages: Record<string, Message[]> = {};
 
-  private messages: Record<string, Message[]> = {
-    conv_1: [
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.conversations = [
+      // 1. Circle / Group Chat (MSG-03)
       {
-        id: 'msg_1',
-        conversationId: 'conv_1',
-        senderId: 'user_3',
-        senderName: 'Pooja Iyer',
-        body: 'Looking forward to the photo walk tomorrow!',
-        createdAt: '2026-09-23T18:30:00Z',
-        moderationState: 'clean',
+        id: 'conv_circle_1',
+        type: 'circle',
+        title: 'Sunday Photography Circle',
+        objectId: 'circle_1',
+        participantIds: ['user_1', 'user_2', 'user_3', 'user_4'],
+        lastMessage: 'See everyone at 8 AM near Indiranagar Metro! 📸',
+        lastMessageAt: '10:45 AM',
+        unreadCount: 2,
+        sharedContext: 'Indiranagar • Weekly Photowalk Group',
+        pinnedPrompt: 'Weekly Photo Prompt: Golden hour reflections in your neighborhood 🌅',
       },
-    ],
-  };
+      {
+        id: 'conv_circle_2',
+        type: 'circle',
+        title: 'Domlur Badminton Doubles',
+        objectId: 'circle_2',
+        participantIds: ['user_1', 'user_2'],
+        lastMessage: 'Court booked for Sunday 8 AM at Domlur Club.',
+        lastMessageAt: 'Yesterday',
+        unreadCount: 0,
+        sharedContext: 'Domlur • 4-Player Badminton Circle',
+        pinnedPrompt: 'Bring non-marking shoes and your favorite feather shuttles! 🏸',
+      },
+      // 2. Direct 1:1 Connections (MSG-02)
+      {
+        id: 'conv_direct_1',
+        type: 'direct',
+        title: 'Rohan Mehta',
+        avatar: mockUsers[1].photos[0],
+        participantIds: ['user_1', 'user_2'],
+        lastMessage: 'Let me know if you want to test my 50mm f/1.4 lens tomorrow!',
+        lastMessageAt: '10:30 AM',
+        unreadCount: 1,
+        sharedContext: 'You met in Sunday Photography Circle & Indiranagar zone',
+        suggestedIcebreakers: [
+          'What camera / film stock do you shoot with? 📷',
+          'Know any great photo spots around Indiranagar?',
+          'Excited for the upcoming Indiranagar 35mm Film Walk!',
+        ],
+      },
+      {
+        id: 'conv_direct_2',
+        type: 'direct',
+        title: 'Sneha Kapoor',
+        avatar: mockUsers[2].photos[0],
+        participantIds: ['user_1', 'user_3'],
+        lastMessage: 'Shared the artisan roastery recommendations in HSR.',
+        lastMessageAt: 'Yesterday',
+        unreadCount: 0,
+        sharedContext: 'Connected via Koramangala Coffee Collective',
+        suggestedIcebreakers: [
+          "What's your go-to artisan coffee spot in Koramangala? ☕",
+          'Up for an espresso tasting session this weekend?',
+        ],
+      },
+      // 3. Message Requests (MSG-04)
+      {
+        id: 'conv_req_1',
+        type: 'request',
+        title: 'Vikram Nair',
+        avatar: mockUsers[3].photos[0],
+        participantIds: ['user_1', 'user_4'],
+        lastMessage: 'Would love to invite you for Terraforming Mars with our HSR board game group!',
+        lastMessageAt: '2 days ago',
+        unreadCount: 1,
+        sharedContext: 'Shares Board Games (Strategy) & HSR Layout zone',
+        requestStatus: 'pending',
+        requestOpeningMessage:
+          'Hey Aisha! Loved your design portfolio and saw you love strategy board games. Would love to have you join our game night in HSR!',
+      },
+    ];
 
-  async getConversations(_userId: string): Promise<Conversation[]> {
-    await simulateDelay();
+    this.messages = {
+      conv_circle_1: [
+        {
+          id: 'msg_c1_1',
+          conversationId: 'conv_circle_1',
+          senderId: 'user_3',
+          senderName: 'Pooja Iyer',
+          senderAvatar: mockUsers[2].photos[0],
+          body: 'Hey everyone! Excited for our Saturday morning photowalk.',
+          createdAt: '2026-09-24T08:00:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+        {
+          id: 'msg_c1_2',
+          conversationId: 'conv_circle_1',
+          senderId: 'user_2',
+          senderName: 'Rohan Mehta',
+          senderAvatar: mockUsers[1].photos[0],
+          body: 'Bringing some fresh Kodak Gold 200 rolls for anyone who needs one.',
+          createdAt: '2026-09-24T08:15:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+        {
+          id: 'msg_c1_3',
+          conversationId: 'conv_circle_1',
+          senderId: 'system',
+          senderName: 'LIGHT Event Bot',
+          body: '📅 New Circle Event Announcement',
+          type: 'system_card',
+          systemCardPayload: {
+            title: 'Indiranagar 35mm Film Walk',
+            subtitle: 'Saturday 8:00 AM • Indiranagar 100ft Road • 6 spots left',
+            actionLabel: 'RSVP for Event',
+            actionType: 'rsvp_event',
+            eventId: 'event_1',
+            dateStr: 'Saturday, 8:00 AM',
+            venue: 'Indiranagar 100ft Road',
+          },
+          createdAt: '2026-09-24T09:00:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+        {
+          id: 'msg_c1_4',
+          conversationId: 'conv_circle_1',
+          senderId: 'user_1',
+          senderName: 'Aisha Rao',
+          body: 'See everyone at 8 AM near Indiranagar Metro! 📸',
+          createdAt: '2026-09-25T10:45:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+      ],
+      conv_direct_1: [
+        {
+          id: 'msg_d1_1',
+          conversationId: 'conv_direct_1',
+          senderId: 'user_2',
+          senderName: 'Rohan Mehta',
+          senderAvatar: mockUsers[1].photos[0],
+          body: 'Hey Aisha! Loved your architecture shots from the last walk.',
+          createdAt: '2026-09-24T14:20:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+        {
+          id: 'msg_d1_2',
+          conversationId: 'conv_direct_1',
+          senderId: 'user_1',
+          senderName: 'Aisha Rao',
+          body: 'Thanks Rohan! Really appreciate it. Are you bringing your prime lens tomorrow?',
+          createdAt: '2026-09-24T14:35:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+        {
+          id: 'msg_d1_3',
+          conversationId: 'conv_direct_1',
+          senderId: 'user_2',
+          senderName: 'Rohan Mehta',
+          senderAvatar: mockUsers[1].photos[0],
+          body: 'Let me know if you want to test my 50mm f/1.4 lens tomorrow!',
+          createdAt: '2026-09-25T10:30:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+      ],
+      conv_direct_2: [
+        {
+          id: 'msg_d2_1',
+          conversationId: 'conv_direct_2',
+          senderId: 'user_3',
+          senderName: 'Sneha Kapoor',
+          senderAvatar: mockUsers[2].photos[0],
+          body: 'Shared the artisan roastery recommendations in HSR.',
+          createdAt: '2026-09-24T16:00:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+      ],
+      conv_req_1: [
+        {
+          id: 'msg_r1_1',
+          conversationId: 'conv_req_1',
+          senderId: 'user_4',
+          senderName: 'Vikram Nair',
+          senderAvatar: mockUsers[3].photos[0],
+          body:
+            'Hey Aisha! Loved your design portfolio and saw you love strategy board games. Would love to have you join our game night in HSR!',
+          createdAt: '2026-09-23T12:00:00Z',
+          status: 'sent',
+          moderationState: 'clean',
+        },
+      ],
+    };
+  }
+
+  get mockConversations(): Conversation[] {
     return this.conversations;
   }
 
+  async getConversations(
+    userId: string,
+    segment: 'all' | 'circles' | 'connections' | 'requests' = 'all'
+  ): Promise<Conversation[]> {
+    await simulateDelay(60);
+    return this.conversations.filter((c) => {
+      const isParticipant = c.participantIds.includes(userId);
+      if (!isParticipant) return false;
+      if (segment === 'circles') return c.type === 'circle';
+      if (segment === 'connections') return c.type === 'direct';
+      if (segment === 'requests') return c.type === 'request';
+      return true;
+    });
+  }
+
+  async getConversationById(conversationId: string): Promise<Conversation | null> {
+    await simulateDelay(40);
+    return this.conversations.find((c) => c.id === conversationId) || null;
+  }
+
   async getMessages(conversationId: string): Promise<Message[]> {
-    await simulateDelay();
+    await simulateDelay(40);
     return this.messages[conversationId] || [];
   }
 
@@ -1043,23 +1238,92 @@ export class MockMessageRepository implements MessageRepository {
     conversationId: string,
     senderId: string,
     senderName: string,
-    body: string
+    body: string,
+    options?: import('../repositories').SendMessageOptions
   ): Promise<Message> {
-    await simulateDelay();
-    const msg: Message = {
-      id: `msg_${Date.now()}`,
+    await simulateDelay(80);
+
+    const conv = this.conversations.find((c) => c.id === conversationId);
+    if (conv?.isBlocked) {
+      throw new Error('You cannot message this participant because of safety settings.');
+    }
+
+    if (conv?.type === 'request' && conv.requestStatus === 'pending') {
+      throw new Error('Cannot send messages to a pending request before accepting.');
+    }
+
+    const newMsg: Message = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       conversationId,
       senderId,
       senderName,
+      senderAvatar: options?.senderAvatar,
       body,
+      type: options?.type || 'text',
+      mediaUri: options?.mediaUri,
+      mediaModerationState: options?.mediaUri ? 'clean' : undefined,
+      systemCardPayload: options?.systemCardPayload,
       createdAt: new Date().toISOString(),
+      status: 'sent',
       moderationState: 'clean',
     };
+
     if (!this.messages[conversationId]) {
       this.messages[conversationId] = [];
     }
-    this.messages[conversationId].push(msg);
-    return msg;
+    this.messages[conversationId].push(newMsg);
+
+    if (conv) {
+      conv.lastMessage = options?.type === 'image' ? '📷 Image' : body;
+      conv.lastMessageAt = 'Just now';
+    }
+
+    return newMsg;
+  }
+
+  async respondToMessageRequest(
+    conversationId: string,
+    action: 'accepted' | 'declined' | 'blocked'
+  ): Promise<Conversation> {
+    await simulateDelay(80);
+    const conv = this.conversations.find((c) => c.id === conversationId);
+    if (!conv) throw new Error('Conversation not found');
+
+    if (action === 'accepted') {
+      conv.requestStatus = 'accepted';
+      conv.type = 'direct';
+    } else if (action === 'declined') {
+      conv.requestStatus = 'declined';
+      this.conversations = this.conversations.filter((c) => c.id !== conversationId);
+    } else if (action === 'blocked') {
+      conv.isBlocked = true;
+      this.conversations = this.conversations.filter((c) => c.id !== conversationId);
+    }
+
+    return conv;
+  }
+
+  async toggleConversationMute(conversationId: string): Promise<boolean> {
+    await simulateDelay(40);
+    const conv = this.conversations.find((c) => c.id === conversationId);
+    if (!conv) throw new Error('Conversation not found');
+    conv.isMuted = !conv.isMuted;
+    return !!conv.isMuted;
+  }
+
+  async deleteMessageForMe(messageId: string, _userId: string): Promise<void> {
+    await simulateDelay(40);
+    for (const convId in this.messages) {
+      this.messages[convId] = this.messages[convId].filter((m) => m.id !== messageId);
+    }
+  }
+
+  async blockParticipant(conversationId: string, _actorUserId: string): Promise<void> {
+    await simulateDelay(60);
+    const conv = this.conversations.find((c) => c.id === conversationId);
+    if (conv) {
+      conv.isBlocked = true;
+    }
   }
 }
 
