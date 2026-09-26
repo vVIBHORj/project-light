@@ -160,10 +160,81 @@ export interface MessageRepository {
   blockParticipant(conversationId: string, actorUserId: string): Promise<void>;
 }
 
+export interface CreateEventDto {
+  title: string;
+  description?: string;
+  activityType: string;
+  circleId?: string;
+  circleTitle?: string;
+  communityId?: string;
+  communityTitle?: string;
+  hostId: string;
+  hostName: string;
+  hostAvatar?: string;
+  isHostVerified?: boolean;
+  dateStr: string;
+  timeStr: string;
+  locationZone: string;
+  venueCategory: string;
+  exactAddress?: string;
+  capacity: number;
+  priceBand: import('../../domain/types').PriceBand | string;
+  houseRules?: string[];
+  safetyNotes?: string[];
+  coverImage?: string;
+}
+
+export interface EventFilters {
+  zone?: string;
+  category?: string;
+  dateFilter?: 'all' | 'today' | 'weekend' | 'this_week' | 'upcoming';
+  priceBand?: string;
+  verifiedHostOnly?: boolean;
+  searchQuery?: string;
+}
+
+export interface CreateDatePlanDto {
+  connectionId: string;
+  proposerId: string;
+  proposerName: string;
+  recipientId: string;
+  recipientName: string;
+  venueCategory: string;
+  locationZone: string;
+  suggestedDate: string;
+  suggestedTime: string;
+  note?: string;
+  safetyPlanEnabled?: boolean;
+}
+
 export interface EventRepository {
-  getEvents(filters?: { zone?: string }): Promise<Event[]>;
+  getEvents(filters?: EventFilters): Promise<Event[]>;
   getEventById(id: string): Promise<Event | null>;
-  rsvpEvent(eventId: string, userId: string): Promise<Event>;
+  getAttendees(eventId: string): Promise<import('../../domain/types').EventAttendee[]>;
+  createEvent(data: CreateEventDto): Promise<Event>;
+  cancelEventByHost(eventId: string, hostId: string, reason?: string): Promise<Event>;
+  rsvpEvent(
+    eventId: string,
+    user: { userId: string; userName: string; userAvatar?: string; isVerified?: boolean }
+  ): Promise<{ attendee: import('../../domain/types').EventAttendee; event: Event }>;
+  cancelRsvp(
+    eventId: string,
+    userId: string
+  ): Promise<{ event: Event; promotedAttendee?: import('../../domain/types').EventAttendee }>;
+  checkIn(eventId: string, userId: string, code?: string): Promise<{ success: boolean; error?: string }>;
+  submitFeedback(feedback: import('../../domain/types').EventFeedback): Promise<void>;
+  getEventFeedback(eventId: string): Promise<import('../../domain/types').EventFeedback[]>;
+  createDatePlan(data: CreateDatePlanDto): Promise<import('../../domain/types').DatePlanProposal>;
+  getDatePlans(userId: string): Promise<import('../../domain/types').DatePlanProposal[]>;
+  respondToDatePlan(
+    planId: string,
+    action: 'confirm' | 'cancel' | 'counter',
+    counterNotes?: string
+  ): Promise<import('../../domain/types').DatePlanProposal>;
+  completeDatePlan(
+    planId: string,
+    outcome: import('../../domain/types').DatePlanPostOutcome
+  ): Promise<import('../../domain/types').DatePlanProposal>;
 }
 
 export interface SafetyRepository {

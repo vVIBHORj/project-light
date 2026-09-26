@@ -214,21 +214,91 @@ export interface Circle {
   createdAt: string;
 }
 
+export type EventRsvpState = 'going' | 'waitlist' | 'cancelled' | 'checked_in';
+export type EventState = 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+export type PriceBand = 'Free' | 'Under ₹500' | 'Split cost';
+
+export interface EventAttendee {
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  isVerified?: boolean;
+  status: EventRsvpState;
+  rsvpdAt: string;
+  checkedInAt?: string;
+}
+
 export interface Event {
   id: string;
   circleId?: string;
+  circleTitle?: string;
   communityId?: string;
+  communityTitle?: string;
   hostId: string;
   hostName: string;
+  hostAvatar?: string;
+  isHostVerified?: boolean;
   title: string;
+  description?: string;
   activityType: string;
   dateStr: string;
   timeStr: string;
   venueZone: string;
+  venueCategory?: string;
+  exactAddress?: string; // Revealed only to confirmed attendees
   capacity: number;
   rsvpsCount: number;
-  state: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
-  priceBand: string;
+  waitlistCount?: number;
+  state: EventState;
+  priceBand: PriceBand | string;
+  coverImage?: string;
+  houseRules?: string[];
+  safetyNotes?: string[];
+  checkInCode?: string;
+  createdAt?: string;
+}
+
+export interface EventFeedback {
+  eventId: string;
+  userId: string;
+  rating: number;
+  tags: string[]; // e.g. ['Welcoming Vibe', 'Safe & Comfortable', 'Great Host', 'Punctual']
+  comment?: string;
+  createdAt: string;
+}
+
+export type DatePlanStatus =
+  | 'proposed'
+  | 'counter_proposed'
+  | 'confirmed'
+  | 'cancelled'
+  | 'completed';
+
+export type DatePlanPostOutcome =
+  | 'stay_connected'
+  | 'friends'
+  | 'continue_dating'
+  | 'stop'
+  | 'reported';
+
+export interface DatePlanProposal {
+  id: string;
+  connectionId: string;
+  proposerId: string;
+  proposerName: string;
+  recipientId: string;
+  recipientName: string;
+  venueCategory: string; // e.g. 'Third-wave Cafe', 'Art Gallery', 'Public Botanical Gardens', 'Board Game Parlour'
+  locationZone: string;
+  suggestedDate: string;
+  suggestedTime: string;
+  note?: string;
+  counterNotes?: string;
+  status: DatePlanStatus;
+  safetyPlanEnabled: boolean;
+  postDateOutcome?: DatePlanPostOutcome;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type ConnectionState = 'pending' | 'accepted' | 'declined' | 'restricted' | 'blocked';

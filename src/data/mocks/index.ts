@@ -32,7 +32,11 @@ import {
   mockCommunities,
   mockEvents,
   mockInterests,
+  mockAttendees,
+  mockDatePlans,
+  mockEventFeedbacks,
 } from './seedData';
+import { EventStateMachine } from '../../domain/eventStateMachine';
 import { storage } from '../../lib/storage';
 
 const simulateDelay = async (ms = 150) => {
@@ -1329,10 +1333,39 @@ export class MockMessageRepository implements MessageRepository {
 
 export class MockEventRepository implements EventRepository {
   private events: Event[] = [...mockEvents];
+  private attendees: Record<string, import('../../domain/types').EventAttendee[]> = {
+    ...mockAttendees,
+  };
+  private datePlans: import('../../domain/types').DatePlanProposal[] = [...mockDatePlans];
+  private feedbacks: Record<string, import('../../domain/types').EventFeedback[]> = {
+    event_1: [...mockEventFeedbacks],
+  };
 
-  async getEvents(): Promise<Event[]> {
+  async getEvents(filters?: import('../repositories').EventFilters): Promise<Event[]> {
     await simulateDelay();
-    return this.events;
+    return this.events.filter((ev) => {
+      if (filters?.zone && filters.zone !== 'All' && !ev.venueZone.toLowerCase().includes(filters.zone.toLowerCase())) {
+        return false;
+      }
+      if (filters?.category && filters.category !== 'All' && ev.activityType !== filters.category) {
+        return false;
+      }
+      if (filters?.priceBand && filters.priceBand !== 'All' && ev.priceBand !== filters.priceBand) {
+        return false;
+      }
+      if (filters?.verifiedHostOnly && !ev.isHostVerified) {
+        return false;
+      }
+      if (filters?.searchQuery && filters.searchQuery.trim().length > 0) {
+        const q = filters.searchQuery.toLowerCase().trim();
+        const matchesTitle = ev.title.toLowerCase().includes(q);
+        const matchesDesc = ev.description?.toLowerCase().includes(q);
+        const matchesZone = ev.venueZone.toLowerCase().includes(q);
+        const matchesAct = ev.activityType.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesDesc && !matchesZone && !matchesAct) return false;
+      }
+      return true;
+    });
   }
 
   async getEventById(id: string): Promise<Event | null> {
@@ -1340,12 +1373,231 @@ export class MockEventRepository implements EventRepository {
     return this.events.find((e) => e.id === id) || null;
   }
 
-  async rsvpEvent(eventId: string, _userId: string): Promise<Event> {
+  async getAttendees(eventId: string): Promise<import('../../domain/types').EventAttendee[]> {
+    await simulateDelay(60);
+    return this.attendees[eventId] || [];
+  }
+
+  async createEvent(data: import('../repositories').CreateEventDto): Promise<Event> {
+    await simulateDelay();
+    if (data.capacity < 4 || data.capacity > 12) {
+      throw new Error('Event capacity must be between 4 and 12 members.');
+    }
+    if (!data.title.trim() || !data.activityType.trim() || !data.locationZone.trim()) {
+      throw new Error('Title, activity type, and location zone are required.');
+    }
+
+    const checkInCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+    const newEvent: Event = {
+      id: `event_${Date.now()}`,
+      title: data.title.trim(),
+      description: data.description?.trim(),
+      activityType: data.activityType,
+      circleId: data.circleId,
+      circleTitle: data.circleTitle,
+      communityId: data.communityId,
+      communityTitle: data.communityTitle,
+      hostId: data.hostId,
+      hostName: data.hostName,
+      hostAvatar: data.hostAvatar,
+      isHostVerified: data.isHostVerified ?? true,
+      dateStr: data.dateStr,
+      timeStr: data.timeStr,
+      venueZone: data.locationZone,
+      venueCategory: data.venueCategory,
+      exactAddress: data.exactAddress,
+      capacity: data.capacity,
+      rsvpsCount: 1, // Host is first attendee
+      waitlistCount: 0,
+      state: 'upcoming',
+      priceBand: data.priceBand,
+      coverImage:
+        data.coverImage ||
+        'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80',
+      houseRules: data.houseRules && data.houseRules.length > 0
+        ? data.houseRules
+        : ['Be welcoming and respectful', 'Arrive on time', 'Leave no litter'],
+      safetyNotes: data.safetyNotes && data.safetyNotes.length > 0
+        ? data.safetyNotes
+        : ['Meet in daylight public spaces', 'Tell a trusted contact your plan'],
+      checkInCode,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.events.unshift(newEvent);
+
+    // Add host as first confirmed attendee
+    this.attendees[newEvent.id] = [
+      {
+        userId: data.hostId,
+        userName: data.hostName,
+        userAvatar: data.hostAvatar,
+        isVerified: data.isHostVerified,
+        status: 'going',
+        rsvpdAt: new Date().toISOString(),
+      },
+    ];
+
+    return newEvent;
+  }
+
+  async cancelEventByHost(eventId: string, hostId: string, _reason?: string): Promise<Event> {
     await simulateDelay();
     const ev = this.events.find((e) => e.id === eventId);
     if (!ev) throw new Error('Event not found');
-    ev.rsvpsCount++;
+    if (ev.hostId !== hostId) throw new Error('Only the host can cancel this event.');
+
+    ev.state = 'cancelled';
     return ev;
+  }
+
+  async rsvpEvent(
+    eventId: string,
+    user: { userId: string; userName: string; userAvatar?: string; isVerified?: boolean }
+  ): Promise<{ attendee: import('../../domain/types').EventAttendee; event: Event }> {
+    await simulateDelay();
+    const ev = this.events.find((e) => e.id === eventId);
+    if (!ev) throw new Error('Event not found');
+    if (ev.state === 'cancelled') throw new Error('Cannot RSVP to a cancelled event.');
+
+    const currentList = this.attendees[eventId] || [];
+    const { attendee, result } = EventStateMachine.evaluateRsvp(ev, currentList, user);
+
+    // Update attendee list atomically
+    const existingIndex = currentList.findIndex((a) => a.userId === user.userId);
+    if (existingIndex !== -1) {
+      currentList[existingIndex] = attendee;
+    } else {
+      currentList.push(attendee);
+    }
+    this.attendees[eventId] = currentList;
+
+    // Update event counter fields
+    ev.rsvpsCount = result.rsvpsCount;
+    ev.waitlistCount = result.waitlistCount;
+
+    return { attendee, event: ev };
+  }
+
+  async cancelRsvp(
+    eventId: string,
+    userId: string
+  ): Promise<{ event: Event; promotedAttendee?: import('../../domain/types').EventAttendee }> {
+    await simulateDelay();
+    const ev = this.events.find((e) => e.id === eventId);
+    if (!ev) throw new Error('Event not found');
+
+    const currentList = this.attendees[eventId] || [];
+    const cancelRes = EventStateMachine.handleCancellation(ev, currentList, userId);
+
+    this.attendees[eventId] = cancelRes.updatedAttendees;
+    ev.rsvpsCount = cancelRes.newRsvpsCount;
+    ev.waitlistCount = cancelRes.newWaitlistCount;
+
+    return { event: ev, promotedAttendee: cancelRes.promotedAttendee };
+  }
+
+  async checkIn(
+    eventId: string,
+    userId: string,
+    code?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    await simulateDelay();
+    const ev = this.events.find((e) => e.id === eventId);
+    if (!ev) return { success: false, error: 'Event not found' };
+
+    const currentList = this.attendees[eventId] || [];
+    const attendee = currentList.find((a) => a.userId === userId);
+
+    const validation = EventStateMachine.validateCheckIn(ev, attendee, code);
+    if (!validation.success) {
+      return validation;
+    }
+
+    if (attendee) {
+      attendee.status = 'checked_in';
+      attendee.checkedInAt = new Date().toISOString();
+    }
+
+    return { success: true };
+  }
+
+  async submitFeedback(feedback: import('../../domain/types').EventFeedback): Promise<void> {
+    await simulateDelay();
+    if (!this.feedbacks[feedback.eventId]) {
+      this.feedbacks[feedback.eventId] = [];
+    }
+    this.feedbacks[feedback.eventId].push(feedback);
+  }
+
+  async getEventFeedback(eventId: string): Promise<import('../../domain/types').EventFeedback[]> {
+    await simulateDelay(60);
+    return this.feedbacks[eventId] || [];
+  }
+
+  async createDatePlan(
+    data: import('../repositories').CreateDatePlanDto
+  ): Promise<import('../../domain/types').DatePlanProposal> {
+    await simulateDelay();
+    const newPlan: import('../../domain/types').DatePlanProposal = {
+      id: `date_plan_${Date.now()}`,
+      connectionId: data.connectionId,
+      proposerId: data.proposerId,
+      proposerName: data.proposerName,
+      recipientId: data.recipientId,
+      recipientName: data.recipientName,
+      venueCategory: data.venueCategory,
+      locationZone: data.locationZone,
+      suggestedDate: data.suggestedDate,
+      suggestedTime: data.suggestedTime,
+      note: data.note,
+      status: 'proposed',
+      safetyPlanEnabled: data.safetyPlanEnabled ?? true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.datePlans.unshift(newPlan);
+    return newPlan;
+  }
+
+  async getDatePlans(userId: string): Promise<import('../../domain/types').DatePlanProposal[]> {
+    await simulateDelay(60);
+    return this.datePlans.filter(
+      (p) => p.proposerId === userId || p.recipientId === userId
+    );
+  }
+
+  async respondToDatePlan(
+    planId: string,
+    action: 'confirm' | 'cancel' | 'counter',
+    counterNotes?: string
+  ): Promise<import('../../domain/types').DatePlanProposal> {
+    await simulateDelay();
+    const plan = this.datePlans.find((p) => p.id === planId);
+    if (!plan) throw new Error('Date plan not found');
+
+    plan.status = EventStateMachine.evaluateDatePlanTransition(plan.status, action);
+    if (counterNotes) {
+      plan.counterNotes = counterNotes;
+    }
+    plan.updatedAt = new Date().toISOString();
+    return plan;
+  }
+
+  async completeDatePlan(
+    planId: string,
+    outcome: import('../../domain/types').DatePlanPostOutcome
+  ): Promise<import('../../domain/types').DatePlanProposal> {
+    await simulateDelay();
+    const plan = this.datePlans.find((p) => p.id === planId);
+    if (!plan) throw new Error('Date plan not found');
+
+    plan.status = 'completed';
+    plan.postDateOutcome = outcome;
+    plan.updatedAt = new Date().toISOString();
+    return plan;
   }
 }
 
