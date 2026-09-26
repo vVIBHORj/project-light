@@ -12,12 +12,27 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
+import { SafetyCase } from '../../../domain/safetyTypes';
 
-export const SafetyCaseTimelineModal: React.FC = () => {
-  const isVisible = useSafetyStore((s) => s.isCaseTimelineModalOpen);
-  const activeCase = useSafetyStore((s) => s.activeSafetyCase);
-  const closeCaseTimelineModal = useSafetyStore((s) => s.closeCaseTimelineModal);
-  const submitAppeal = useSafetyStore((s) => s.submitAppeal);
+export interface SafetyCaseTimelineModalProps {
+  visible?: boolean;
+  safetyCase?: SafetyCase | null;
+  onClose?: () => void;
+}
+
+export const SafetyCaseTimelineModal: React.FC<SafetyCaseTimelineModalProps> = ({
+  visible: propVisible,
+  safetyCase: propSafetyCase,
+  onClose: propClose,
+}) => {
+  const isStoreOpen = useSafetyStore((s) => s.isCaseTimelineModalOpen);
+  const storeCase = useSafetyStore((s) => s.activeCase);
+  const closeCaseTimeline = useSafetyStore((s) => s.closeCaseTimeline);
+  const appealCase = useSafetyStore((s) => s.appealCase);
+
+  const isVisible = propVisible !== undefined ? propVisible : isStoreOpen;
+  const activeCase = propSafetyCase !== undefined ? propSafetyCase : storeCase;
+  const handleClose = propClose || closeCaseTimeline;
 
   const [showAppealForm, setShowAppealForm] = useState(false);
   const [appealReason, setAppealReason] = useState('');
@@ -30,21 +45,12 @@ export const SafetyCaseTimelineModal: React.FC = () => {
     if (!appealReason.trim()) return;
     setIsSubmittingAppeal(true);
     try {
-      const res = await submitAppeal(activeCase.id, appealReason.trim());
-      if (res.success) {
-        setAppealSuccess(true);
-        setShowAppealForm(false);
-      }
+      await appealCase(activeCase.caseId, appealReason.trim());
+      setAppealSuccess(true);
+      setShowAppealForm(false);
     } finally {
       setIsSubmittingAppeal(false);
     }
-  };
-
-  const handleClose = () => {
-    setShowAppealForm(false);
-    setAppealReason('');
-    setAppealSuccess(false);
-    closeCaseTimelineModal();
   };
 
   const statusLabel = {
@@ -53,6 +59,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
     action_taken: 'Resolved - Action Taken',
     no_action: 'Resolved - Closed',
     appealed: 'Appeal Under Review',
+    appeal_resolved: 'Appeal Resolved',
   }[activeCase.status];
 
   const statusColor = {
@@ -61,6 +68,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
     action_taken: colors.safety,
     no_action: colors.textSecondary,
     appealed: '#8B5CF6',
+    appeal_resolved: colors.safety,
   }[activeCase.status];
 
   return (
@@ -79,7 +87,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
                 <MaterialCommunityIcons name="clipboard-text-clock-outline" size={20} color={statusColor} />
               </View>
               <View>
-                <Text style={styles.sheetTitle}>Case {activeCase.id}</Text>
+                <Text style={styles.sheetTitle}>Case {activeCase.caseId}</Text>
                 <Text style={styles.sheetSubtitle}>Reported: {activeCase.targetName}</Text>
               </View>
             </View>
@@ -148,13 +156,13 @@ export const SafetyCaseTimelineModal: React.FC = () => {
                     <View style={styles.timelineContent}>
                       <View style={styles.timelineHeader}>
                         <Text style={styles.timelineStatusTitle}>
-                          {event.status.replace('_', ' ').toUpperCase()}
+                          {event.title || event.status.replace('_', ' ').toUpperCase()}
                         </Text>
                         <Text style={styles.timelineTime}>
                           {new Date(event.timestamp).toLocaleDateString()}
                         </Text>
                       </View>
-                      <Text style={styles.timelineNote}>{event.note}</Text>
+                      <Text style={styles.timelineNote}>{event.description}</Text>
                     </View>
                   </View>
                 );
@@ -162,7 +170,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
             </View>
 
             {/* Appeal Section */}
-            {activeCase.appealAllowed && activeCase.status !== 'appealed' && !appealSuccess && (
+            {activeCase.appealEligible && activeCase.status !== 'appealed' && !appealSuccess && (
               <View style={styles.appealSection}>
                 {!showAppealForm ? (
                   <TouchableOpacity
@@ -181,7 +189,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
                     <TextInput
                       style={styles.appealInput}
                       placeholder="Explain your grounds for appeal..."
-                      placeholderTextColor={colors.textTertiary}
+                      placeholderTextColor={colors.textMuted}
                       multiline
                       numberOfLines={3}
                       value={appealReason}
@@ -201,7 +209,7 @@ export const SafetyCaseTimelineModal: React.FC = () => {
                         disabled={!appealReason.trim() || isSubmittingAppeal}
                       >
                         {isSubmittingAppeal ? (
-                          <ActivityIndicator size="small" color={colors.white} />
+                          <ActivityIndicator size="small" color={colors.surface} />
                         ) : (
                           <Text style={styles.appealSubmitText}>Submit Appeal</Text>
                         )}
@@ -225,13 +233,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.bottomSheet,
+    borderTopRightRadius: radii.bottomSheet,
     maxHeight: '90%',
     paddingTop: 20,
     paddingHorizontal: 20,
-    ...shadows.elevated,
+    ...shadows.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -239,7 +247,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -254,12 +262,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   sheetSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   closeBtn: {
@@ -270,7 +278,7 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     padding: 16,
@@ -295,7 +303,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   statusBadgeText: {
-    fontSize: typography.fontSize.caption,
+    fontSize: 10,
     fontWeight: '700',
   },
   detailRow: {
@@ -303,18 +311,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   detailLabel: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   detailVal: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
     color: colors.textPrimary,
     textTransform: 'capitalize',
   },
   resolutionBox: {
-    backgroundColor: colors.white,
-    borderRadius: radii.badge,
+    backgroundColor: colors.surface,
+    borderRadius: radii.xs,
     padding: 10,
     marginTop: 6,
     borderWidth: 1,
@@ -327,7 +335,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   resolutionText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     lineHeight: 18,
   },
@@ -335,13 +343,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(14, 159, 142, 0.1)',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     padding: 12,
     marginBottom: 16,
     gap: 8,
   },
   appealSuccessText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.safety,
     fontWeight: '600',
     flex: 1,
@@ -394,11 +402,11 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   timelineTime: {
-    fontSize: typography.fontSize.caption,
-    color: colors.textTertiary,
+    fontSize: 11,
+    color: colors.textMuted,
   },
   timelineNote: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 2,
     lineHeight: 18,
@@ -418,36 +426,36 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(47, 128, 237, 0.05)',
   },
   appealLaunchText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '700',
     color: colors.primary,
   },
   appealFormCard: {
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     padding: 14,
     gap: 10,
   },
   appealFormTitle: {
-    fontSize: typography.fontSize.subhead,
+    fontSize: typography.fontSize.body,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   appealFormDesc: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     lineHeight: 18,
   },
   appealInput: {
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: radii.card,
+    borderRadius: radii.sm,
     padding: 10,
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textPrimary,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     textAlignVertical: 'top',
     minHeight: 60,
   },
@@ -463,7 +471,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   appealCancelText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   appealSubmitBtn: {
@@ -474,8 +482,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   appealSubmitText: {
-    color: colors.white,
-    fontSize: typography.fontSize.footnote,
+    color: colors.surface,
+    fontSize: typography.fontSize.caption,
     fontWeight: '700',
   },
 });

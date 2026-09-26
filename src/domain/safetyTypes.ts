@@ -67,11 +67,13 @@ export interface DateSafetyPlan {
   startedAt: string;
 }
 
+export type RestrictionType = 'block' | 'restrict';
+
 export interface RestrictionItem {
   id: string;
   targetUserId: string;
   targetName: string;
-  type: 'block' | 'restrict';
+  type: RestrictionType;
   reason?: string;
   createdAt: string;
 }

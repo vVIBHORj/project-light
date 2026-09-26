@@ -37,7 +37,8 @@ describe('Phase 9 — Safety Domain & Store Test Suite', () => {
     });
 
     it('contains Grievance Officer information per IT Rules 2021', () => {
-      expect(GRIEVANCE_OFFICER.name).toBe('Grievance Redressal Officer');
+      expect(GRIEVANCE_OFFICER.name).toBe('Ananya Deshmukh, Advocate');
+      expect(GRIEVANCE_OFFICER.designation).toContain('Grievance');
       expect(GRIEVANCE_OFFICER.email).toContain('@light.app');
       expect(GRIEVANCE_OFFICER.statutoryNotice).toContain('Information Technology');
     });

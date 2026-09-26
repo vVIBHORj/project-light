@@ -12,6 +12,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
+import { UserProfile } from '../../../domain/types';
 
 const PRE_DATE_TIPS = [
   {
@@ -36,48 +37,59 @@ const PRE_DATE_TIPS = [
   },
 ];
 
-export const DateSafetyModal: React.FC = () => {
-  const isVisible = useSafetyStore((s) => s.isDateSafetyModalOpen);
-  const activePlan = useSafetyStore((s) => s.activeDateSafetyPlan);
-  const trustedContacts = useSafetyStore((s) => s.trustedContacts);
-  const closeDateSafetyModal = useSafetyStore((s) => s.closeDateSafetyModal);
-  const startDateSafetyTimer = useSafetyStore((s) => s.startDateSafetyTimer);
-  const triggerDateSafetyAlert = useSafetyStore((s) => s.triggerDateSafetyAlert);
-  const stopDateSafetyTimer = useSafetyStore((s) => s.stopDateSafetyTimer);
+export interface DateSafetyModalProps {
+  visible?: boolean;
+  currentUser?: UserProfile;
+  onClose?: () => void;
+}
 
-  const [targetName, setTargetName] = useState('');
-  const [venue, setVenue] = useState('');
+export const DateSafetyModal: React.FC<DateSafetyModalProps> = ({
+  visible: propVisible,
+  onClose: propClose,
+}) => {
+  const isStoreOpen = useSafetyStore((s) => s.isDateSafetyModalOpen);
+  const activePlan = useSafetyStore((s) => s.activeDatePlan);
+  const trustedContacts = useSafetyStore((s) => s.trustedContacts);
+  const setDateSafetyModalOpen = useSafetyStore((s) => s.setDateSafetyModalOpen);
+  const startDateSafetyTimer = useSafetyStore((s) => s.startDateSafetyTimer);
+  const triggerSos = useSafetyStore((s) => s.triggerSos);
+
+  const isVisible = propVisible !== undefined ? propVisible : isStoreOpen;
+  const handleClose = propClose || (() => setDateSafetyModalOpen(false));
+
+  const [partnerName, setPartnerName] = useState('');
+  const [venueCategory, setVenueCategory] = useState('');
+  const [locationZone, setLocationZone] = useState('');
   const [durationHours, setDurationHours] = useState(2);
-  const [selectedContactId, setSelectedContactId] = useState<string>(
-    trustedContacts[0]?.id || ''
-  );
   const [activeTab, setActiveTab] = useState<'tips' | 'plan'>('tips');
 
   const handleStartTimer = async () => {
-    if (!targetName.trim() || !venue.trim()) {
-      Alert.alert('Details Required', 'Please enter who you are meeting and the public venue.');
+    if (!partnerName.trim() || !venueCategory.trim() || !locationZone.trim()) {
+      Alert.alert('Details Required', 'Please enter partner name, venue type, and neighborhood zone.');
       return;
     }
 
     await startDateSafetyTimer({
-      targetName: targetName.trim(),
-      venue: venue.trim(),
-      durationHours,
-      emergencyContactId: selectedContactId || undefined,
+      connectionId: `conn_${Date.now()}`,
+      partnerName: partnerName.trim(),
+      venueCategory: venueCategory.trim(),
+      locationZone: locationZone.trim(),
+      startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timerDurationMinutes: durationHours * 60,
     });
   };
 
   const handleSosTrigger = () => {
     Alert.alert(
       'Trigger Quick Safety Alert?',
-      'This will notify your trusted contact with your last recorded venue and initiate emergency assistance.',
+      'This will notify your trusted contacts with your recorded meetup venue and alert emergency response.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: "Send Alert",
+          text: 'Send Alert',
           style: 'destructive',
           onPress: async () => {
-            await triggerDateSafetyAlert();
+            await triggerSos();
           },
         },
       ]
@@ -89,7 +101,7 @@ export const DateSafetyModal: React.FC = () => {
       visible={isVisible}
       animationType="slide"
       transparent={true}
-      onRequestClose={closeDateSafetyModal}
+      onRequestClose={handleClose}
     >
       <View style={styles.backdrop}>
         <View style={styles.sheetContainer}>
@@ -106,7 +118,7 @@ export const DateSafetyModal: React.FC = () => {
             </View>
 
             <TouchableOpacity
-              onPress={closeDateSafetyModal}
+              onPress={handleClose}
               style={styles.closeBtn}
               accessibilityLabel="Close modal"
             >
@@ -161,7 +173,7 @@ export const DateSafetyModal: React.FC = () => {
                 onPress={() => setActiveTab('plan')}
                 activeOpacity={0.8}
               >
-                <MaterialCommunityIcons name="timer-outline" size={20} color={colors.white} />
+                <MaterialCommunityIcons name="timer-outline" size={20} color={colors.surface} />
                 <Text style={styles.primaryPillText}>Set Up Check-In Timer</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -181,19 +193,22 @@ export const DateSafetyModal: React.FC = () => {
 
                   <View style={styles.planInfoRow}>
                     <Text style={styles.planInfoLabel}>Meeting With:</Text>
-                    <Text style={styles.planInfoVal}>{activePlan.targetName}</Text>
+                    <Text style={styles.planInfoVal}>{activePlan.partnerName}</Text>
                   </View>
                   <View style={styles.planInfoRow}>
-                    <Text style={styles.planInfoLabel}>Location:</Text>
-                    <Text style={styles.planInfoVal}>{activePlan.venue}</Text>
-                  </View>
-                  <View style={styles.planInfoRow}>
-                    <Text style={styles.planInfoLabel}>Scheduled Check-In:</Text>
+                    <Text style={styles.planInfoLabel}>Venue & Zone:</Text>
                     <Text style={styles.planInfoVal}>
-                      {new Date(activePlan.scheduledCheckInTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {activePlan.venueCategory} ({activePlan.locationZone})
+                    </Text>
+                  </View>
+                  <View style={styles.planInfoRow}>
+                    <Text style={styles.planInfoLabel}>Timer Duration:</Text>
+                    <Text style={styles.planInfoVal}>{activePlan.timerDurationMinutes} mins</Text>
+                  </View>
+                  <View style={styles.planInfoRow}>
+                    <Text style={styles.planInfoLabel}>Status:</Text>
+                    <Text style={[styles.planInfoVal, { color: colors.safety }]}>
+                      {activePlan.timerStatus.toUpperCase()}
                     </Text>
                   </View>
 
@@ -202,17 +217,8 @@ export const DateSafetyModal: React.FC = () => {
                     onPress={handleSosTrigger}
                     activeOpacity={0.8}
                   >
-                    <MaterialCommunityIcons name="alert-octagon" size={20} color={colors.white} />
+                    <MaterialCommunityIcons name="alert-octagon" size={20} color={colors.surface} />
                     <Text style={styles.sosButtonText}>Something&apos;s Wrong (Quick SOS)</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.safeEndButton}
-                    onPress={stopDateSafetyTimer}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialCommunityIcons name="check-circle-outline" size={18} color={colors.safety} />
-                    <Text style={styles.safeEndButtonText}>I am Safe (End Timer)</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -222,18 +228,27 @@ export const DateSafetyModal: React.FC = () => {
                   <TextInput
                     style={styles.input}
                     placeholder="e.g. Priya Sharma"
-                    placeholderTextColor={colors.textTertiary}
-                    value={targetName}
-                    onChangeText={setTargetName}
+                    placeholderTextColor={colors.textMuted}
+                    value={partnerName}
+                    onChangeText={setPartnerName}
                   />
 
-                  <Text style={styles.fieldLabel}>Public Meetup Venue</Text>
+                  <Text style={styles.fieldLabel}>Public Venue Type</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder="e.g. Third Wave Coffee, Indiranagar"
-                    placeholderTextColor={colors.textTertiary}
-                    value={venue}
-                    onChangeText={setVenue}
+                    placeholder="e.g. Cafe / Restaurant / Gallery"
+                    placeholderTextColor={colors.textMuted}
+                    value={venueCategory}
+                    onChangeText={setVenueCategory}
+                  />
+
+                  <Text style={styles.fieldLabel}>Neighborhood / Zone</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Indiranagar, Bangalore"
+                    placeholderTextColor={colors.textMuted}
+                    value={locationZone}
+                    onChangeText={setLocationZone}
                   />
 
                   <Text style={styles.fieldLabel}>Check-In Time Interval</Text>
@@ -260,31 +275,12 @@ export const DateSafetyModal: React.FC = () => {
                   </View>
 
                   {trustedContacts.length > 0 && (
-                    <>
-                      <Text style={styles.fieldLabel}>Emergency Trusted Contact</Text>
-                      <View style={styles.contactsList}>
-                        {trustedContacts.map((contact) => (
-                          <TouchableOpacity
-                            key={contact.id}
-                            style={[
-                              styles.contactOption,
-                              selectedContactId === contact.id && styles.contactOptionSelected,
-                            ]}
-                            onPress={() => setSelectedContactId(contact.id)}
-                          >
-                            <MaterialCommunityIcons
-                              name="account-heart-outline"
-                              size={20}
-                              color={selectedContactId === contact.id ? colors.safety : colors.textSecondary}
-                            />
-                            <Text style={styles.contactOptionName}>{contact.name}</Text>
-                            {selectedContactId === contact.id && (
-                              <MaterialCommunityIcons name="check" size={18} color={colors.safety} />
-                            )}
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </>
+                    <View style={styles.contactNotice}>
+                      <MaterialCommunityIcons name="account-heart" size={18} color={colors.safety} />
+                      <Text style={styles.contactNoticeText}>
+                        {trustedContacts.length} trusted contact{trustedContacts.length > 1 ? 's' : ''} on standby.
+                      </Text>
+                    </View>
                   )}
 
                   <TouchableOpacity
@@ -292,7 +288,7 @@ export const DateSafetyModal: React.FC = () => {
                     onPress={handleStartTimer}
                     activeOpacity={0.8}
                   >
-                    <MaterialCommunityIcons name="shield-check" size={20} color={colors.white} />
+                    <MaterialCommunityIcons name="shield-check" size={20} color={colors.surface} />
                     <Text style={styles.primaryPillText}>Start Safety Check-In</Text>
                   </TouchableOpacity>
                 </View>
@@ -312,13 +308,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.bottomSheet,
+    borderTopRightRadius: radii.bottomSheet,
     maxHeight: '90%',
     paddingTop: 20,
     paddingHorizontal: 20,
-    ...shadows.elevated,
+    ...shadows.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -326,7 +322,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -342,12 +338,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   sheetSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   closeBtn: {
@@ -367,11 +363,11 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   segmentBtnActive: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     ...shadows.card,
   },
   segmentText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
     color: colors.textSecondary,
   },
@@ -383,7 +379,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   sectionHeading: {
-    fontSize: typography.fontSize.subhead,
+    fontSize: typography.fontSize.body,
     fontWeight: '700',
     color: colors.textPrimary,
     marginBottom: 12,
@@ -398,7 +394,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     padding: 14,
     gap: 12,
   },
@@ -416,7 +412,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   tipDesc: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 2,
     lineHeight: 18,
@@ -432,7 +428,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   primaryPillText: {
-    color: colors.white,
+    color: colors.surface,
     fontSize: typography.fontSize.body,
     fontWeight: '700',
   },
@@ -450,7 +446,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: radii.card,
+    borderRadius: radii.sm,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: typography.fontSize.body,
@@ -469,14 +465,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: radii.pill,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   durationChipSelected: {
     borderColor: colors.safety,
     backgroundColor: 'rgba(14, 159, 142, 0.1)',
   },
   durationChipText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
     color: colors.textSecondary,
   },
@@ -484,33 +480,23 @@ const styles = StyleSheet.create({
     color: colors.safety,
     fontWeight: '700',
   },
-  contactsList: {
-    gap: 8,
-    marginBottom: 14,
-  },
-  contactOption: {
+  contactNotice: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: radii.card,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    gap: 10,
+    backgroundColor: 'rgba(14, 159, 142, 0.08)',
+    padding: 10,
+    borderRadius: radii.sm,
+    gap: 8,
+    marginVertical: 4,
   },
-  contactOptionSelected: {
-    borderColor: colors.safety,
-    backgroundColor: 'rgba(14, 159, 142, 0.05)',
-  },
-  contactOptionName: {
-    flex: 1,
-    fontSize: typography.fontSize.body,
+  contactNoticeText: {
+    fontSize: typography.fontSize.caption,
+    color: colors.safety,
     fontWeight: '600',
-    color: colors.textPrimary,
   },
   activePlanCard: {
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: 'rgba(14, 159, 142, 0.3)',
     padding: 18,
@@ -531,7 +517,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.safety,
   },
   activePlanTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.safety,
   },
@@ -540,11 +526,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   planInfoLabel: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   planInfoVal: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '700',
     color: colors.textPrimary,
   },
@@ -560,23 +546,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   sosButtonText: {
-    color: colors.white,
-    fontSize: typography.fontSize.body,
-    fontWeight: '700',
-  },
-  safeEndButton: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.safety,
-    borderRadius: radii.pill,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  safeEndButtonText: {
-    color: colors.safety,
+    color: colors.surface,
     fontSize: typography.fontSize.body,
     fontWeight: '700',
   },

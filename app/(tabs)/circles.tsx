@@ -152,12 +152,14 @@ export default function CirclesScreen() {
   // Handle Submit Report
   const handleSubmitReport = async (reason: string, evidence: string) => {
     if (reportOrLeaveTarget) {
-      await mockSafetyRepo.report({
+      await mockSafetyRepo.submitReport({
         reporterId: currentUser.userId,
-        targetType: reportOrLeaveTarget.type,
+        targetType: reportOrLeaveTarget.type as 'circle' | 'user' | 'message' | 'post' | 'comment',
         targetId: reportOrLeaveTarget.id,
+        targetName: reportOrLeaveTarget.type,
         category: 'other',
-        evidence: `${reason} - ${evidence}`,
+        severity: 'medium',
+        details: `${reason} - ${evidence}`,
       });
       setToastMessage('Report submitted. Our safety team will review promptly.');
     }

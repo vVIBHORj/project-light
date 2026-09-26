@@ -13,6 +13,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
 import { ReportCategory, ReportSeverity } from '../../../domain/safetyTypes';
+import { UserProfile } from '../../../domain/types';
 
 interface CategoryOption {
   id: ReportCategory;
@@ -31,16 +32,16 @@ const REPORT_CATEGORIES: CategoryOption[] = [
     icon: 'account-alert-outline',
   },
   {
-    id: 'inappropriate_content',
-    label: 'Inappropriate Content',
-    desc: 'Nudity, sexually explicit, or graphic violence',
+    id: 'boundary_violation',
+    label: 'Inappropriate Content & Boundaries',
+    desc: 'Nudity, sexually explicit, or non-consensual boundary push',
     defaultSeverity: 'medium',
     icon: 'eye-off-outline',
   },
   {
-    id: 'spam_scam',
+    id: 'scam_financial',
     label: 'Spam, Scam, or Fraud',
-    desc: 'Commercial spam, fake profiles, or financial extortion',
+    desc: 'Commercial spam, fake accounts, or financial extortion',
     defaultSeverity: 'medium',
     icon: 'shield-alert-outline',
   },
@@ -48,25 +49,18 @@ const REPORT_CATEGORIES: CategoryOption[] = [
     id: 'hate_speech',
     label: 'Hate Speech & Discrimination',
     desc: 'Attacking individuals based on identity, religion, or caste',
-    defaultSeverity: 'critical',
+    defaultSeverity: 'urgent',
     icon: 'bullhorn-outline',
   },
   {
-    id: 'impersonation',
+    id: 'impersonation_fake',
     label: 'Impersonation or Fake Account',
     desc: 'Pretending to be you or someone else without consent',
     defaultSeverity: 'medium',
     icon: 'card-account-details-outline',
   },
   {
-    id: 'offline_safety_threat',
-    label: 'Immediate Offline Threat',
-    desc: 'Stalking, physical threats, or non-consensual tracking',
-    defaultSeverity: 'critical',
-    icon: 'alert-octagon-outline',
-  },
-  {
-    id: 'underage_account',
+    id: 'underage',
     label: 'Underage User (< 18)',
     desc: 'User appears to be under 18 years of age',
     defaultSeverity: 'high',
@@ -81,21 +75,36 @@ const REPORT_CATEGORIES: CategoryOption[] = [
   },
 ];
 
-export const ReportModal: React.FC = () => {
-  const isVisible = useSafetyStore((s) => s.isReportModalOpen);
-  const target = useSafetyStore((s) => s.activeReportTarget);
-  const closeReportModal = useSafetyStore((s) => s.closeReportModal);
+export interface ReportModalProps {
+  visible?: boolean;
+  currentUser?: UserProfile;
+  onClose?: () => void;
+}
+
+export const ReportModal: React.FC<ReportModalProps> = ({
+  visible: propVisible,
+  currentUser,
+  onClose: propClose,
+}) => {
+  const isStoreOpen = useSafetyStore((s) => s.isReportModalOpen);
+  const storeTarget = useSafetyStore((s) => s.reportTarget);
+  const closeStoreReport = useSafetyStore((s) => s.closeReportModal);
   const submitReport = useSafetyStore((s) => s.submitReport);
-  const isSubmitting = useSafetyStore((s) => s.isSubmittingReport);
+
+  const isVisible = propVisible !== undefined ? propVisible : isStoreOpen;
+  const target = storeTarget || {
+    targetType: 'user' as const,
+    targetId: 'user_unknown',
+    targetName: 'Community Member',
+  };
 
   const [selectedCategory, setSelectedCategory] = useState<ReportCategory | null>(null);
   const [severity, setSeverity] = useState<ReportSeverity>('medium');
-  const [description, setDescription] = useState('');
+  const [details, setDetails] = useState('');
   const [limitContact, setLimitContact] = useState(true);
   const [submittedCaseId, setSubmittedCaseId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
-
-  if (!target) return null;
 
   const handleCategorySelect = (cat: CategoryOption) => {
     setSelectedCategory(cat.id);
@@ -108,31 +117,37 @@ export const ReportModal: React.FC = () => {
       return;
     }
     setErrorText(null);
+    setIsSubmitting(true);
 
-    const result = await submitReport({
-      targetType: target.targetType,
-      targetId: target.targetId,
-      targetName: target.targetName,
-      category: selectedCategory,
-      severity,
-      description: description.trim() || undefined,
-      contentSnippet: target.contentSnippet,
-      immediateAction: limitContact ? 'block' : undefined,
-    });
+    try {
+      const reporterId = currentUser?.userId || 'current_user';
+      const createdCase = await submitReport(reporterId, {
+        category: selectedCategory,
+        severity,
+        details: details.trim() || undefined,
+        applyImmediateProtection: limitContact ? 'block' : 'none',
+      });
 
-    if (result.success && result.caseId) {
-      setSubmittedCaseId(result.caseId);
-    } else {
-      setErrorText(result.error || 'Unable to submit report. Please try again.');
+      if (createdCase && createdCase.caseId) {
+        setSubmittedCaseId(createdCase.caseId);
+      } else {
+        setErrorText('Unable to submit report. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDone = () => {
     setSelectedCategory(null);
-    setDescription('');
+    setDetails('');
     setSubmittedCaseId(null);
     setErrorText(null);
-    closeReportModal();
+    if (propClose) {
+      propClose();
+    } else {
+      closeStoreReport();
+    }
   };
 
   return (
@@ -204,15 +219,6 @@ export const ReportModal: React.FC = () => {
               contentContainerStyle={{ paddingBottom: 24 }}
               showsVerticalScrollIndicator={false}
             >
-              {target.contentSnippet && (
-                <View style={styles.snippetCard}>
-                  <Text style={styles.snippetLabel}>Reported Content:</Text>
-                  <Text style={styles.snippetText} numberOfLines={2}>
-                    &ldquo;{target.contentSnippet}&rdquo;
-                  </Text>
-                </View>
-              )}
-
               <Text style={styles.sectionHeader}>Select Category</Text>
               <View style={styles.categoryList}>
                 {REPORT_CATEGORIES.map((cat) => {
@@ -231,7 +237,7 @@ export const ReportModal: React.FC = () => {
                         <MaterialCommunityIcons
                           name={cat.icon}
                           size={20}
-                          color={isSelected ? colors.white : colors.textPrimary}
+                          color={isSelected ? colors.surface : colors.textPrimary}
                         />
                       </View>
                       <View style={{ flex: 1 }}>
@@ -255,14 +261,14 @@ export const ReportModal: React.FC = () => {
                   <View
                     style={[
                       styles.severityPill,
-                      severity === 'critical' && styles.severityPillCritical,
+                      severity === 'urgent' && styles.severityPillCritical,
                       severity === 'high' && styles.severityPillHigh,
                     ]}
                   >
                     <Text
                       style={[
                         styles.severityPillText,
-                        (severity === 'critical' || severity === 'high') && { color: colors.white },
+                        (severity === 'urgent' || severity === 'high') && { color: colors.surface },
                       ]}
                     >
                       {severity.toUpperCase()} PRIORITY
@@ -276,11 +282,11 @@ export const ReportModal: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 placeholder="Add any helpful details or timestamps..."
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
-                value={description}
-                onChangeText={setDescription}
+                value={details}
+                onChangeText={setDetails}
                 maxLength={500}
               />
 
@@ -293,7 +299,7 @@ export const ReportModal: React.FC = () => {
                 <MaterialCommunityIcons
                   name={limitContact ? 'checkbox-marked' : 'checkbox-blank-outline'}
                   size={24}
-                  color={limitContact ? colors.safety : colors.textTertiary}
+                  color={limitContact ? colors.safety : colors.textMuted}
                 />
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={styles.toggleTitle}>Limit contact with this account</Text>
@@ -317,7 +323,7 @@ export const ReportModal: React.FC = () => {
                 activeOpacity={0.8}
               >
                 {isSubmitting ? (
-                  <ActivityIndicator color={colors.white} />
+                  <ActivityIndicator color={colors.surface} />
                 ) : (
                   <Text style={styles.primaryPillText}>Submit Confidential Report</Text>
                 )}
@@ -337,13 +343,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.bottomSheet,
+    borderTopRightRadius: radii.bottomSheet,
     maxHeight: '90%',
     paddingTop: 20,
     paddingHorizontal: 20,
-    ...shadows.elevated,
+    ...shadows.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -351,7 +357,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -367,12 +373,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   sheetSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   closeBtn: {
@@ -380,25 +386,6 @@ const styles = StyleSheet.create({
   },
   scrollBody: {
     paddingTop: 16,
-  },
-  snippetCard: {
-    backgroundColor: colors.glassBackground,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.safety,
-    padding: 12,
-    borderRadius: radii.badge,
-    marginBottom: 16,
-  },
-  snippetLabel: {
-    fontSize: typography.fontSize.caption,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  snippetText: {
-    fontSize: typography.fontSize.subhead,
-    color: colors.textPrimary,
-    fontStyle: 'italic',
   },
   sectionHeader: {
     fontSize: typography.fontSize.caption,
@@ -417,7 +404,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -431,7 +418,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -450,7 +437,7 @@ const styles = StyleSheet.create({
     color: colors.safety,
   },
   catDesc: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 2,
   },
@@ -461,7 +448,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   severityLabel: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   severityPill: {
@@ -477,14 +464,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.destructive,
   },
   severityPillText: {
-    fontSize: typography.fontSize.caption,
+    fontSize: 10,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   textInput: {
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: radii.card,
+    borderRadius: radii.sm,
     padding: 12,
     fontSize: typography.fontSize.body,
     color: colors.textPrimary,
@@ -498,30 +485,30 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     backgroundColor: 'rgba(14, 159, 142, 0.06)',
     padding: 12,
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     marginBottom: 20,
   },
   toggleTitle: {
-    fontSize: typography.fontSize.subhead,
+    fontSize: typography.fontSize.body,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   toggleSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 2,
   },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(235, 87, 87, 0.1)',
+    backgroundColor: 'rgba(229, 72, 77, 0.1)',
     padding: 10,
-    borderRadius: radii.badge,
+    borderRadius: radii.xs,
     marginBottom: 14,
     gap: 8,
   },
   errorBannerText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.destructive,
     flex: 1,
   },
@@ -537,7 +524,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   primaryPillText: {
-    color: colors.white,
+    color: colors.surface,
     fontSize: typography.fontSize.body,
     fontWeight: '700',
   },
@@ -550,7 +537,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(14, 159, 142, 0.1)',
     borderWidth: 1,
     borderColor: colors.safety,
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     paddingVertical: 12,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -579,11 +566,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F1F5F9',
     padding: 12,
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     gap: 10,
   },
   protectionNoticeText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textPrimary,
     flex: 1,
     lineHeight: 18,

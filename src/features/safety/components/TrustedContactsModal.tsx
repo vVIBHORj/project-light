@@ -12,13 +12,27 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
+import { UserProfile } from '../../../domain/types';
 
-export const TrustedContactsModal: React.FC = () => {
-  const isVisible = useSafetyStore((s) => s.isTrustedContactsModalOpen);
+export interface TrustedContactsModalProps {
+  visible?: boolean;
+  currentUser?: UserProfile;
+  onClose?: () => void;
+}
+
+export const TrustedContactsModal: React.FC<TrustedContactsModalProps> = ({
+  visible: propVisible,
+  currentUser,
+  onClose: propClose,
+}) => {
+  const isStoreOpen = useSafetyStore((s) => s.isTrustedContactsModalOpen);
   const contacts = useSafetyStore((s) => s.trustedContacts);
-  const closeTrustedContactsModal = useSafetyStore((s) => s.closeTrustedContactsModal);
+  const setTrustedContactsModalOpen = useSafetyStore((s) => s.setTrustedContactsModalOpen);
   const addTrustedContact = useSafetyStore((s) => s.addTrustedContact);
-  const removeTrustedContact = useSafetyStore((s) => s.removeTrustedContact);
+  const deleteTrustedContact = useSafetyStore((s) => s.deleteTrustedContact);
+
+  const isVisible = propVisible !== undefined ? propVisible : isStoreOpen;
+  const handleClose = propClose || (() => setTrustedContactsModalOpen(false));
 
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -41,11 +55,13 @@ export const TrustedContactsModal: React.FC = () => {
     }
 
     setIsAdding(true);
+    const userId = currentUser?.userId || 'current_user';
     try {
       await addTrustedContact({
+        userId,
         name: name.trim(),
         phoneNumber: phoneNumber.trim(),
-        relationship: relationship.trim() || undefined,
+        relationship: relationship.trim() || 'Friend',
       });
       setName('');
       setPhoneNumber('');
@@ -77,7 +93,7 @@ export const TrustedContactsModal: React.FC = () => {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => removeTrustedContact(id),
+          onPress: () => deleteTrustedContact(id),
         },
       ]
     );
@@ -88,7 +104,7 @@ export const TrustedContactsModal: React.FC = () => {
       visible={isVisible}
       animationType="slide"
       transparent={true}
-      onRequestClose={closeTrustedContactsModal}
+      onRequestClose={handleClose}
     >
       <View style={styles.backdrop}>
         <View style={styles.sheetContainer}>
@@ -105,7 +121,7 @@ export const TrustedContactsModal: React.FC = () => {
             </View>
 
             <TouchableOpacity
-              onPress={closeTrustedContactsModal}
+              onPress={handleClose}
               style={styles.closeBtn}
               accessibilityLabel="Close modal"
             >
@@ -130,7 +146,7 @@ export const TrustedContactsModal: React.FC = () => {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.contactName}>{c.name}</Text>
-                        <Text style={styles.contactPhone}>{c.phoneNumber}</Text>
+                        <Text style={styles.contactPhone}>{c.phoneMasked || c.phoneNumber}</Text>
                         {c.relationship && (
                           <Text style={styles.contactRel}>{c.relationship}</Text>
                         )}
@@ -149,7 +165,7 @@ export const TrustedContactsModal: React.FC = () => {
                           onPress={() => handleDelete(c.id, c.name)}
                           style={styles.deleteBtn}
                         >
-                          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textTertiary} />
+                          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -169,7 +185,7 @@ export const TrustedContactsModal: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Sneha Roy"
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.textMuted}
                 value={name}
                 onChangeText={setName}
               />
@@ -178,7 +194,7 @@ export const TrustedContactsModal: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. +91 98765 43210"
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.textMuted}
                 keyboardType="phone-pad"
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
@@ -188,7 +204,7 @@ export const TrustedContactsModal: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Best Friend, Roommate, Sister"
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.textMuted}
                 value={relationship}
                 onChangeText={setRelationship}
               />
@@ -202,7 +218,7 @@ export const TrustedContactsModal: React.FC = () => {
                 <MaterialCommunityIcons
                   name={hasConsent ? 'checkbox-marked' : 'checkbox-blank-outline'}
                   size={22}
-                  color={hasConsent ? colors.safety : colors.textTertiary}
+                  color={hasConsent ? colors.safety : colors.textMuted}
                 />
                 <Text style={styles.consentText}>
                   I confirm that I have informed this person that they are listed as my emergency trusted contact.
@@ -215,7 +231,7 @@ export const TrustedContactsModal: React.FC = () => {
                 disabled={!hasConsent || isAdding}
                 activeOpacity={0.8}
               >
-                <MaterialCommunityIcons name="account-plus-outline" size={18} color={colors.white} />
+                <MaterialCommunityIcons name="account-plus-outline" size={18} color={colors.surface} />
                 <Text style={styles.primaryPillText}>
                   {isAdding ? 'Saving...' : 'Save Trusted Contact'}
                 </Text>
@@ -235,13 +251,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.bottomSheet,
+    borderTopRightRadius: radii.bottomSheet,
     maxHeight: '90%',
     paddingTop: 20,
     paddingHorizontal: 20,
-    ...shadows.elevated,
+    ...shadows.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -249,7 +265,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -265,12 +281,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   sheetSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   closeBtn: {
@@ -297,7 +313,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -317,12 +333,12 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   contactPhone: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 1,
   },
   contactRel: {
-    fontSize: typography.fontSize.caption,
+    fontSize: 11,
     color: colors.safety,
     fontWeight: '600',
     marginTop: 2,
@@ -333,7 +349,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   testBtn: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.safety,
     borderRadius: radii.pill,
@@ -350,18 +366,18 @@ const styles = StyleSheet.create({
   },
   addFormCard: {
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     padding: 16,
   },
   formTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   formDesc: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 2,
     marginBottom: 14,
@@ -377,12 +393,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: radii.card,
+    borderRadius: radii.sm,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: typography.fontSize.body,
     color: colors.textPrimary,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     marginBottom: 12,
   },
   consentRow: {
@@ -392,7 +408,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   consentText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textPrimary,
     flex: 1,
     lineHeight: 18,
@@ -412,7 +428,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   primaryPillText: {
-    color: colors.white,
+    color: colors.surface,
     fontSize: typography.fontSize.body,
     fontWeight: '700',
   },

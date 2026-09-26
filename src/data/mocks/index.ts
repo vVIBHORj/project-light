@@ -23,7 +23,6 @@ import {
   Conversation,
   Message,
   Event,
-  SafetyReport,
   Interest,
 } from '../../domain/types';
 import {

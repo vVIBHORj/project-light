@@ -13,7 +13,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
 
-interface AgeHoldModalProps {
+export interface AgeHoldModalProps {
   visible?: boolean;
   onClose?: () => void;
   reason?: 'underage' | 'safety_hold' | 'suspended';
@@ -25,10 +25,10 @@ export const AgeHoldModal: React.FC<AgeHoldModalProps> = ({
   reason = 'underage',
 }) => {
   const storeVisible = useSafetyStore((s) => s.isAgeHoldModalOpen);
-  const closeStoreModal = useSafetyStore((s) => s.closeAgeHoldModal);
+  const setAgeHoldModalOpen = useSafetyStore((s) => s.setAgeHoldModalOpen);
 
   const isVisible = propVisible !== undefined ? propVisible : storeVisible;
-  const handleClose = propClose || closeStoreModal;
+  const handleClose = propClose || (() => setAgeHoldModalOpen(false));
 
   const [supportMessage, setSupportMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -92,7 +92,7 @@ export const AgeHoldModal: React.FC<AgeHoldModalProps> = ({
               <TextInput
                 style={styles.textInput}
                 placeholder="Explain the situation or request DOB correction..."
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
                 value={supportMessage}
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: 24,
     alignItems: 'center',
-    ...shadows.elevated,
+    ...shadows.card,
   },
   iconCircle: {
     width: 64,
@@ -147,13 +147,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 4,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   supportBox: {
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -186,11 +186,11 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: radii.card,
+    borderRadius: radii.sm,
     padding: 10,
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textPrimary,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     textAlignVertical: 'top',
     minHeight: 50,
   },
@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitBtnText: {
-    color: colors.white,
-    fontSize: typography.fontSize.footnote,
+    color: colors.surface,
+    fontSize: typography.fontSize.caption,
     fontWeight: '700',
   },
   secondaryBtn: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   secondaryBtnText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     fontWeight: '600',
   },

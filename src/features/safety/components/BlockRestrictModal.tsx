@@ -12,40 +12,63 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, shadows, typography } from '../../../design-system/tokens';
 import { useSafetyStore } from '../state/useSafetyStore';
 import { RestrictionType } from '../../../domain/safetyTypes';
+import { UserProfile } from '../../../domain/types';
 
-export const BlockRestrictModal: React.FC = () => {
-  const isVisible = useSafetyStore((s) => s.isBlockModalOpen);
-  const target = useSafetyStore((s) => s.activeBlockTarget);
+export interface BlockRestrictModalProps {
+  visible?: boolean;
+  currentUser?: UserProfile;
+  targetUser?: { userId: string; name: string };
+  onClose?: () => void;
+}
+
+export const BlockRestrictModal: React.FC<BlockRestrictModalProps> = ({
+  visible: propVisible,
+  currentUser,
+  targetUser: propTargetUser,
+  onClose: propClose,
+}) => {
+  const isStoreOpen = useSafetyStore((s) => s.isBlockRestrictModalOpen);
+  const storeTarget = useSafetyStore((s) => s.blockRestrictTarget);
   const restrictions = useSafetyStore((s) => s.restrictions);
-  const closeBlockModal = useSafetyStore((s) => s.closeBlockModal);
+  const closeStoreModal = useSafetyStore((s) => s.closeBlockRestrictModal);
   const blockUser = useSafetyStore((s) => s.blockUser);
   const restrictUser = useSafetyStore((s) => s.restrictUser);
-  const removeRestriction = useSafetyStore((s) => s.removeRestriction);
+  const unblockUser = useSafetyStore((s) => s.unblockUser);
+  const unrestrictUser = useSafetyStore((s) => s.unrestrictUser);
+
+  const isVisible = propVisible !== undefined ? propVisible : isStoreOpen;
+  const target = propTargetUser || storeTarget;
+  const handleClose = propClose || closeStoreModal;
 
   const [activeTab, setActiveTab] = useState<'action' | 'manage'>(target ? 'action' : 'manage');
   const [selectedType, setSelectedType] = useState<RestrictionType>('restrict');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // If opened directly from Safety Center without a target, default to manage view
   const isDirectManage = !target;
 
   const handleApply = async () => {
     if (!target) return;
     setIsProcessing(true);
+    const actorId = currentUser?.userId || 'current_user';
     try {
       if (selectedType === 'block') {
-        await blockUser(target.userId, target.userName);
+        await blockUser(actorId, target.userId, target.name);
       } else {
-        await restrictUser(target.userId, target.userName);
+        await restrictUser(actorId, target.userId, target.name);
       }
-      closeBlockModal();
+      handleClose();
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleRemove = async (userId: string) => {
-    await removeRestriction(userId);
+  const handleRemove = async (targetUserId: string, type: 'block' | 'restrict') => {
+    const actorId = currentUser?.userId || 'current_user';
+    if (type === 'block') {
+      await unblockUser(actorId, targetUserId);
+    } else {
+      await unrestrictUser(actorId, targetUserId);
+    }
   };
 
   return (
@@ -53,7 +76,7 @@ export const BlockRestrictModal: React.FC = () => {
       visible={isVisible}
       animationType="slide"
       transparent={true}
-      onRequestClose={closeBlockModal}
+      onRequestClose={handleClose}
     >
       <View style={styles.backdrop}>
         <View style={styles.sheetContainer}>
@@ -65,7 +88,7 @@ export const BlockRestrictModal: React.FC = () => {
               </View>
               <View>
                 <Text style={styles.sheetTitle}>
-                  {isDirectManage ? 'Blocked & Restricted Accounts' : `Safety Controls: ${target?.userName}`}
+                  {isDirectManage ? 'Blocked & Restricted Accounts' : `Safety Controls: ${target?.name}`}
                 </Text>
                 <Text style={styles.sheetSubtitle}>
                   {isDirectManage ? `${restrictions.length} active restrictions` : 'Choose the level of privacy you need'}
@@ -74,7 +97,7 @@ export const BlockRestrictModal: React.FC = () => {
             </View>
 
             <TouchableOpacity
-              onPress={closeBlockModal}
+              onPress={handleClose}
               style={styles.closeBtn}
               accessibilityLabel="Close dialog"
             >
@@ -111,7 +134,7 @@ export const BlockRestrictModal: React.FC = () => {
               showsVerticalScrollIndicator={false}
             >
               <Text style={styles.explainerText}>
-                We will never notify <Text style={{ fontWeight: '700' }}>{target.userName}</Text> about your choice.
+                We will never notify <Text style={{ fontWeight: '700' }}>{target.name}</Text> about your choice.
               </Text>
 
               {/* Restrict Option */}
@@ -166,7 +189,7 @@ export const BlockRestrictModal: React.FC = () => {
                 activeOpacity={0.8}
               >
                 <View style={styles.optionHeader}>
-                  <View style={[styles.optionIconContainer, { backgroundColor: 'rgba(235, 87, 87, 0.1)' }]}>
+                  <View style={[styles.optionIconContainer, { backgroundColor: 'rgba(229, 72, 77, 0.1)' }]}>
                     <MaterialCommunityIcons
                       name="block-helper"
                       size={20}
@@ -203,10 +226,10 @@ export const BlockRestrictModal: React.FC = () => {
                 activeOpacity={0.8}
               >
                 {isProcessing ? (
-                  <ActivityIndicator color={colors.white} />
+                  <ActivityIndicator color={colors.surface} />
                 ) : (
                   <Text style={styles.actionButtonText}>
-                    {selectedType === 'block' ? `Block ${target.userName}` : `Restrict ${target.userName}`}
+                    {selectedType === 'block' ? `Block ${target.name}` : `Restrict ${target.name}`}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -230,7 +253,7 @@ export const BlockRestrictModal: React.FC = () => {
                   {restrictions.map((item) => (
                     <View key={item.targetUserId} style={styles.manageCard}>
                       <View style={styles.manageCardInfo}>
-                        <Text style={styles.manageCardName}>{item.targetUserName}</Text>
+                        <Text style={styles.manageCardName}>{item.targetName}</Text>
                         <View style={styles.manageBadgeRow}>
                           <View
                             style={[
@@ -248,14 +271,14 @@ export const BlockRestrictModal: React.FC = () => {
                             </Text>
                           </View>
                           <Text style={styles.manageDate}>
-                            {new Date(item.restrictedAt).toLocaleDateString()}
+                            {new Date(item.createdAt).toLocaleDateString()}
                           </Text>
                         </View>
                       </View>
 
                       <TouchableOpacity
                         style={styles.unrestrictBtn}
-                        onPress={() => handleRemove(item.targetUserId)}
+                        onPress={() => handleRemove(item.targetUserId, item.type)}
                       >
                         <Text style={styles.unrestrictBtnText}>
                           {item.type === 'block' ? 'Unblock' : 'Unrestrict'}
@@ -280,13 +303,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.bottomSheet,
+    borderTopRightRadius: radii.bottomSheet,
     maxHeight: '90%',
     paddingTop: 20,
     paddingHorizontal: 20,
-    ...shadows.elevated,
+    ...shadows.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -294,7 +317,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -310,12 +333,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   sheetSubtitle: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
   },
   closeBtn: {
@@ -335,11 +358,11 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   segmentBtnActive: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     ...shadows.card,
   },
   segmentText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     fontWeight: '600',
     color: colors.textSecondary,
   },
@@ -351,13 +374,13 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   explainerText: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginBottom: 16,
     textAlign: 'center',
   },
   optionCard: {
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     backgroundColor: '#F8FAFC',
@@ -370,7 +393,7 @@ const styles = StyleSheet.create({
   },
   optionCardSelectedBlock: {
     borderColor: colors.destructive,
-    backgroundColor: 'rgba(235, 87, 87, 0.04)',
+    backgroundColor: 'rgba(229, 72, 77, 0.04)',
   },
   optionHeader: {
     flexDirection: 'row',
@@ -407,7 +430,7 @@ const styles = StyleSheet.create({
     color: colors.safety,
   },
   optionDesc: {
-    fontSize: typography.fontSize.footnote,
+    fontSize: typography.fontSize.caption,
     color: colors.textSecondary,
     marginTop: 4,
     lineHeight: 18,
@@ -443,7 +466,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.destructive,
   },
   actionButtonText: {
-    color: colors.white,
+    color: colors.surface,
     fontSize: typography.fontSize.body,
     fontWeight: '700',
   },
@@ -454,7 +477,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyTitle: {
-    fontSize: typography.fontSize.cardTitle,
+    fontSize: typography.fontSize.sectionTitle,
     fontWeight: '700',
     color: colors.textPrimary,
   },
@@ -473,7 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#F8FAFC',
-    borderRadius: radii.card,
+    borderRadius: radii.md,
     padding: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -500,7 +523,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(14, 159, 142, 0.12)',
   },
   typeBadgeBlock: {
-    backgroundColor: 'rgba(235, 87, 87, 0.12)',
+    backgroundColor: 'rgba(229, 72, 77, 0.12)',
   },
   typeBadgeText: {
     fontSize: 10,
@@ -513,11 +536,11 @@ const styles = StyleSheet.create({
     color: colors.destructive,
   },
   manageDate: {
-    fontSize: typography.fontSize.caption,
-    color: colors.textTertiary,
+    fontSize: 11,
+    color: colors.textMuted,
   },
   unrestrictBtn: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: radii.pill,

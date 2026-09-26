@@ -9,7 +9,6 @@ import {
   Conversation,
   Message,
   Event,
-  SafetyReport,
   Interest,
   RelationshipIntent,
 } from '../../domain/types';

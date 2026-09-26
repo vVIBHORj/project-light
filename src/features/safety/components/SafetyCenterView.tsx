@@ -11,12 +11,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing, typography, shadows } from '../../../design-system/tokens';
 import { GlassCard } from '../../../design-system/components/GlassCard';
-import { PillButton } from '../../../design-system/components/PillButton';
+import { UserProfile } from '../../../domain/types';
 import {
   INDIA_EMERGENCY_HELPLINES,
   GRIEVANCE_OFFICER,
-  UserProfile,
-} from '../../../domain/types';
+  EmergencyHelpline,
+} from '../../../domain/safetyTypes';
 import { useSafetyStore } from '../state/useSafetyStore';
 import { ReportModal } from './ReportModal';
 import { BlockRestrictModal } from './BlockRestrictModal';
@@ -52,8 +52,6 @@ export const SafetyCenterView: React.FC<SafetyCenterViewProps> = ({
     openReportModal,
     openBlockRestrictModal,
     closeBlockRestrictModal,
-    unblockUser,
-    unrestrictUser,
     openCaseTimeline,
     closeCaseTimeline,
     closeReportModal,
@@ -287,7 +285,7 @@ export const SafetyCenterView: React.FC<SafetyCenterViewProps> = ({
         </Text>
 
         <View style={styles.helplineList}>
-          {INDIA_EMERGENCY_HELPLINES.map((hl) => (
+          {INDIA_EMERGENCY_HELPLINES.map((hl: EmergencyHelpline) => (
             <TouchableOpacity
               key={hl.number}
               style={styles.helplineItem}
