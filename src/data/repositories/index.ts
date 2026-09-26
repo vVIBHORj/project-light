@@ -237,9 +237,49 @@ export interface EventRepository {
   ): Promise<import('../../domain/types').DatePlanProposal>;
 }
 
+export interface SubmitReportDto {
+  reporterId: string;
+  targetType: 'user' | 'message' | 'circle' | 'post' | 'comment';
+  targetId: string;
+  targetName: string;
+  category: import('../../domain/safetyTypes').ReportCategory;
+  severity: import('../../domain/safetyTypes').ReportSeverity;
+  details?: string;
+  evidenceSnippets?: string[];
+  applyImmediateProtection?: 'none' | 'block' | 'restrict';
+}
+
+export interface AddTrustedContactDto {
+  userId: string;
+  name: string;
+  relationship: string;
+  phoneNumber: string;
+  email?: string;
+}
+
+export interface StartDateSafetyDto {
+  connectionId: string;
+  partnerName: string;
+  venueCategory: string;
+  locationZone: string;
+  startTime: string;
+  timerDurationMinutes: number;
+}
+
 export interface SafetyRepository {
-  report(report: Omit<SafetyReport, 'id' | 'createdAt' | 'status'>): Promise<SafetyReport>;
-  blockUser(targetUserId: string): Promise<void>;
-  restrictUser(targetUserId: string): Promise<void>;
-  getBlockedUsers(): Promise<string[]>;
+  submitReport(data: SubmitReportDto): Promise<import('../../domain/safetyTypes').SafetyCase>;
+  getSafetyCases(userId: string): Promise<import('../../domain/safetyTypes').SafetyCase[]>;
+  getSafetyCaseById(caseId: string): Promise<import('../../domain/safetyTypes').SafetyCase | null>;
+  appealSafetyCase(caseId: string, reason: string): Promise<import('../../domain/safetyTypes').SafetyCase>;
+  blockUser(actorUserId: string, targetUserId: string, targetName: string, reason?: string): Promise<void>;
+  unblockUser(actorUserId: string, targetUserId: string): Promise<void>;
+  restrictUser(actorUserId: string, targetUserId: string, targetName: string, reason?: string): Promise<void>;
+  unrestrictUser(actorUserId: string, targetUserId: string): Promise<void>;
+  getBlockedAndRestrictedUsers(actorUserId: string): Promise<import('../../domain/safetyTypes').RestrictionItem[]>;
+  getBlockedUsers(actorUserId?: string): Promise<string[]>;
+  getTrustedContacts(userId: string): Promise<import('../../domain/safetyTypes').TrustedContact[]>;
+  addTrustedContact(data: AddTrustedContactDto): Promise<import('../../domain/safetyTypes').TrustedContact>;
+  deleteTrustedContact(contactId: string): Promise<void>;
+  startDateSafetyTimer(data: StartDateSafetyDto): Promise<import('../../domain/safetyTypes').DateSafetyPlan>;
+  triggerSosAlert(planId: string): Promise<{ success: boolean; message: string }>;
 }

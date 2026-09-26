@@ -37,6 +37,7 @@ import {
   mockEventFeedbacks,
 } from './seedData';
 import { EventStateMachine } from '../../domain/eventStateMachine';
+import { SafetyStateMachine } from '../../domain/safetyStateMachine';
 import { storage } from '../../lib/storage';
 
 const simulateDelay = async (ms = 150) => {
@@ -1602,39 +1603,264 @@ export class MockEventRepository implements EventRepository {
 }
 
 export class MockSafetyRepository implements SafetyRepository {
-  private blockedUsers: string[] = [];
-  private restrictedUsers: string[] = [];
-  private reports: SafetyReport[] = [];
+  private cases: import('../../domain/safetyTypes').SafetyCase[] = [
+    {
+      caseId: 'CASE-8492-2026',
+      targetType: 'user',
+      targetId: 'user_99',
+      targetName: 'Suspicious Account',
+      reporterId: 'user_1',
+      category: 'scam_financial',
+      severity: 'high',
+      details: 'Sent unsolicited crypto investment links in DM.',
+      status: 'in_review',
+      timeline: [
+        {
+          status: 'received',
+          title: 'Report Received',
+          description: 'Your report was received by Project LIGHT Trust & Safety.',
+          timestamp: '2026-09-24T10:00:00Z',
+        },
+        {
+          status: 'in_review',
+          title: 'Under Moderator Review',
+          description: 'A safety team member is reviewing the report against Community Guidelines.',
+          timestamp: '2026-09-24T12:30:00Z',
+        },
+      ],
+      appealEligible: true,
+      createdAt: '2026-09-24T10:00:00Z',
+      updatedAt: '2026-09-24T12:30:00Z',
+    },
+  ];
 
-  async report(reportData: Omit<SafetyReport, 'id' | 'createdAt' | 'status'>): Promise<SafetyReport> {
+  private restrictions: import('../../domain/safetyTypes').RestrictionItem[] = [];
+  private trustedContacts: import('../../domain/safetyTypes').TrustedContact[] = [
+    {
+      id: 'tc_1',
+      userId: 'user_1',
+      name: 'Pooja (Best Friend)',
+      relationship: 'Friend',
+      phoneNumber: '+91 98765 43210',
+      phoneMasked: '+91 98****3210',
+      email: 'pooja@example.com',
+      isVerifiedConsent: true,
+      addedAt: '2026-09-15T08:00:00Z',
+    },
+  ];
+  private dateSafetyPlans: import('../../domain/safetyTypes').DateSafetyPlan[] = [];
+
+  async submitReport(
+    data: import('../repositories').SubmitReportDto
+  ): Promise<import('../../domain/safetyTypes').SafetyCase> {
     await simulateDelay();
-    const newReport: SafetyReport = {
-      id: `rep_${Date.now()}`,
-      ...reportData,
+    const caseId = SafetyStateMachine.generateCaseId();
+    const now = new Date().toISOString();
+
+    const newCase: import('../../domain/safetyTypes').SafetyCase = {
+      caseId,
+      targetType: data.targetType,
+      targetId: data.targetId,
+      targetName: data.targetName,
+      reporterId: data.reporterId,
+      category: data.category,
+      severity: data.severity,
+      details: data.details,
+      evidenceSnippets: data.evidenceSnippets,
       status: 'received',
-      createdAt: new Date().toISOString(),
+      timeline: [
+        {
+          status: 'received',
+          title: 'Report Received',
+          description: 'Your report has been received and queued for review.',
+          timestamp: now,
+        },
+      ],
+      appealEligible: true,
+      createdAt: now,
+      updatedAt: now,
     };
-    this.reports.push(newReport);
-    return newReport;
+
+    this.cases.unshift(newCase);
+
+    // Apply immediate protection if requested (SAFE-02)
+    if (data.applyImmediateProtection === 'block') {
+      await this.blockUser(data.reporterId, data.targetId, data.targetName, `Report: ${data.category}`);
+    } else if (data.applyImmediateProtection === 'restrict') {
+      await this.restrictUser(data.reporterId, data.targetId, data.targetName, `Report: ${data.category}`);
+    }
+
+    return newCase;
   }
 
-  async blockUser(targetUserId: string): Promise<void> {
+  async getSafetyCases(userId: string): Promise<import('../../domain/safetyTypes').SafetyCase[]> {
+    await simulateDelay(60);
+    return this.cases.filter((c) => c.reporterId === userId);
+  }
+
+  async getSafetyCaseById(
+    caseId: string
+  ): Promise<import('../../domain/safetyTypes').SafetyCase | null> {
+    await simulateDelay(60);
+    return this.cases.find((c) => c.caseId === caseId) || null;
+  }
+
+  async appealSafetyCase(
+    caseId: string,
+    reason: string
+  ): Promise<import('../../domain/safetyTypes').SafetyCase> {
     await simulateDelay();
-    if (!this.blockedUsers.includes(targetUserId)) {
-      this.blockedUsers.push(targetUserId);
+    const found = this.cases.find((c) => c.caseId === caseId);
+    if (!found) throw new Error('Safety case not found');
+
+    const transition = SafetyStateMachine.evaluateCaseTransition(found.status, 'submit_appeal');
+    found.status = transition.nextStatus;
+    found.timeline.push(transition.timelineItem);
+    found.details = `${found.details || ''}\n\n[Appeal Reason]: ${reason}`;
+    found.updatedAt = new Date().toISOString();
+    return found;
+  }
+
+  async blockUser(
+    actorUserId: string,
+    targetUserId: string,
+    targetName: string,
+    reason?: string
+  ): Promise<void> {
+    await simulateDelay();
+    // Remove if previously restricted
+    this.restrictions = this.restrictions.filter(
+      (r) => !(r.targetUserId === targetUserId && r.type === 'restrict')
+    );
+
+    const exists = this.restrictions.some(
+      (r) => r.targetUserId === targetUserId && r.type === 'block'
+    );
+    if (!exists) {
+      this.restrictions.push({
+        id: `rest_${Date.now()}`,
+        targetUserId,
+        targetName,
+        type: 'block',
+        reason,
+        createdAt: new Date().toISOString(),
+      });
     }
   }
 
-  async restrictUser(targetUserId: string): Promise<void> {
+  async unblockUser(_actorUserId: string, targetUserId: string): Promise<void> {
     await simulateDelay();
-    if (!this.restrictedUsers.includes(targetUserId)) {
-      this.restrictedUsers.push(targetUserId);
+    this.restrictions = this.restrictions.filter(
+      (r) => !(r.targetUserId === targetUserId && r.type === 'block')
+    );
+  }
+
+  async restrictUser(
+    actorUserId: string,
+    targetUserId: string,
+    targetName: string,
+    reason?: string
+  ): Promise<void> {
+    await simulateDelay();
+    const exists = this.restrictions.some(
+      (r) => r.targetUserId === targetUserId && r.type === 'restrict'
+    );
+    if (!exists) {
+      this.restrictions.push({
+        id: `rest_${Date.now()}`,
+        targetUserId,
+        targetName,
+        type: 'restrict',
+        reason,
+        createdAt: new Date().toISOString(),
+      });
     }
   }
 
-  async getBlockedUsers(): Promise<string[]> {
-    await simulateDelay(50);
-    return this.blockedUsers;
+  async unrestrictUser(_actorUserId: string, targetUserId: string): Promise<void> {
+    await simulateDelay();
+    this.restrictions = this.restrictions.filter(
+      (r) => !(r.targetUserId === targetUserId && r.type === 'restrict')
+    );
+  }
+
+  async getBlockedAndRestrictedUsers(
+    _actorUserId: string
+  ): Promise<import('../../domain/safetyTypes').RestrictionItem[]> {
+    await simulateDelay(60);
+    return this.restrictions;
+  }
+
+  async getBlockedUsers(_actorUserId?: string): Promise<string[]> {
+    await simulateDelay(20);
+    return this.restrictions
+      .filter((r) => r.type === 'block')
+      .map((r) => r.targetUserId);
+  }
+
+  async getTrustedContacts(
+    userId: string
+  ): Promise<import('../../domain/safetyTypes').TrustedContact[]> {
+    await simulateDelay(60);
+    return this.trustedContacts.filter((c) => c.userId === userId);
+  }
+
+  async addTrustedContact(
+    data: import('../repositories').AddTrustedContactDto
+  ): Promise<import('../../domain/safetyTypes').TrustedContact> {
+    await simulateDelay();
+    const newContact: import('../../domain/safetyTypes').TrustedContact = {
+      id: `tc_${Date.now()}`,
+      userId: data.userId,
+      name: data.name.trim(),
+      relationship: data.relationship,
+      phoneNumber: data.phoneNumber.trim(),
+      phoneMasked: SafetyStateMachine.maskPhoneNumber(data.phoneNumber),
+      email: data.email?.trim(),
+      isVerifiedConsent: true,
+      addedAt: new Date().toISOString(),
+    };
+
+    this.trustedContacts.push(newContact);
+    return newContact;
+  }
+
+  async deleteTrustedContact(contactId: string): Promise<void> {
+    await simulateDelay();
+    this.trustedContacts = this.trustedContacts.filter((c) => c.id !== contactId);
+  }
+
+  async startDateSafetyTimer(
+    data: import('../repositories').StartDateSafetyDto
+  ): Promise<import('../../domain/safetyTypes').DateSafetyPlan> {
+    await simulateDelay();
+    const newPlan: import('../../domain/safetyTypes').DateSafetyPlan = {
+      id: `dsp_${Date.now()}`,
+      connectionId: data.connectionId,
+      partnerName: data.partnerName,
+      venueCategory: data.venueCategory,
+      locationZone: data.locationZone,
+      startTime: data.startTime,
+      timerDurationMinutes: data.timerDurationMinutes,
+      timerStatus: 'active',
+      startedAt: new Date().toISOString(),
+    };
+
+    this.dateSafetyPlans.unshift(newPlan);
+    return newPlan;
+  }
+
+  async triggerSosAlert(planId: string): Promise<{ success: boolean; message: string }> {
+    await simulateDelay();
+    const plan = this.dateSafetyPlans.find((p) => p.id === planId);
+    if (plan) {
+      plan.timerStatus = 'sos_triggered';
+    }
+    return {
+      success: true,
+      message:
+        'Emergency alert dispatched to your trusted contacts with location and check-in details.',
+    };
   }
 }
 

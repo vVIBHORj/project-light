@@ -72,7 +72,7 @@ export default function MeScreen() {
               variant="secondary"
               size="md"
               icon={<Shield size={18} color={colors.safety} />}
-              onPress={() => setSafetyVisible(true)}
+              onPress={() => router.push('/safety')}
               style={styles.menuBtn}
             />
 
